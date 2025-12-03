@@ -63,12 +63,14 @@ const menuItems = [
 ];
 
 // Types
-interface NavbarProps {
+
+export interface NavbarProps {
   isIntro: boolean;
   isMenuOpen: boolean;
   onMenuOpen: () => void;
   onMenuClose: () => void;
 }
+
 
 const Navbar: React.FC<NavbarProps> = ({
   isIntro,
