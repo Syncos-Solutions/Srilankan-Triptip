@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { DM_Sans } from 'next/font/google'
 import './globals.css'
 import WhatsAppButton from '../components/WhatsAppButton'
 
-const inter = Inter({ 
+const dmSans = DM_Sans({ 
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-dm-sans',
   display: 'swap',
   weight: ['400', '500', '600', '700', '800', '900'],
 })
@@ -16,39 +16,42 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
+    { media: '(prefers-color-scheme: light)', color: '#f5f1ee' },
+    { media: '(prefers-color-scheme: dark)', color: '#181818' }
   ],
 }
 
-// SEO Metadata for SAVORIA Café
+// SEO Metadata for Adventure
 export const metadata: Metadata = {
-  metadataBase: new URL('https://savoriacafe.com'),
+  metadataBase: new URL('https://adventure.com'),
 
   title: {
-    default: "SAVORIA Café — Luxury Dining & Culinary Harmony",
-    template: "%s | SAVORIA Café"
+    default: "Adventure — Epic Hiking & Outdoor Expeditions",
+    template: "%s | Adventure"
   },
 
   description:
-    "Welcome to SAVORIA Café — A refined dining experience blending luxury, artistry, and exceptional flavors. Crafted menus, premium ingredients, and unforgettable ambiance.",
+    "Embark on transformative hiking adventures with Adventure. Expert-led expeditions through stunning landscapes, from mountain peaks to pristine wilderness trails worldwide.",
 
   keywords: [
-    "Savoria Café",
-    "luxury dining",
-    "fine dining Sri Lanka",
-    "premium cafe",
-    "gourmet cuisine",
-    "artisan coffee",
-    "culinary experience",
-    "restaurant Colombo",
-    "cafe Sri Lanka",
-    "Savoria restaurant"
+    "hiking adventures",
+    "outdoor expeditions",
+    "mountain hiking",
+    "wilderness tours",
+    "adventure travel",
+    "guided hiking trips",
+    "trekking experiences",
+    "nature exploration",
+    "hiking guides",
+    "outdoor adventures",
+    "mountain trekking",
+    "wilderness camping",
+    "adventure tours"
   ],
 
-  authors: [{ name: "SAVORIA Café" }],
-  creator: "SAVORIA Café",
-  publisher: "SAVORIA Café",
+  authors: [{ name: "Adventure Team" }],
+  creator: "Adventure",
+  publisher: "Adventure",
 
   formatDetection: {
     email: false,
@@ -59,26 +62,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://savoriacafe.com",
-    siteName: "SAVORIA Café",
-    title: "SAVORIA Café — Luxury Dining & Culinary Harmony",
+    url: "https://adventure.com",
+    siteName: "Adventure",
+    title: "Adventure — Epic Hiking & Outdoor Expeditions",
     description:
-      "A refined culinary experience with crafted menus, premium ingredients, and harmonious luxury dining.",
+      "Discover breathtaking trails and wilderness experiences with expert guides. Your gateway to epic outdoor adventures.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "SAVORIA Café — Luxury Dining Experience",
+        alt: "Adventure — Epic Hiking & Outdoor Expeditions",
       }
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "SAVORIA Café — Luxury Dining & Culinary Harmony",
-    description: "Experience elevated dining crafted with passion and precision.",
-    creator: "@savoriacafe",
+    title: "Adventure — Epic Hiking & Outdoor Expeditions",
+    description: "Explore the wonders of the great outdoors with premier hiking adventures.",
+    creator: "@adventure",
     images: ["/twitter-image.jpg"],
   },
 
@@ -112,78 +115,107 @@ export const metadata: Metadata = {
     google: 'your-google-verification-code',
   },
 
-  category: 'restaurant',
+  category: 'travel',
 
   other: {
-    'contact:phone_number': '+94XXXXXXXXX',
-    'contact:email': 'info@savoriacafe.com',
+    'contact:phone_number': '+1 (999) 999-9999',
+    'contact:email': 'support@ditych.com',
   },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 
-  // Structured Data (JSON-LD) for SAVORIA Café
+  // Structured Data (JSON-LD) for Adventure
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Restaurant',
-    '@id': 'https://savoriacafe.com',
-    name: 'SAVORIA Café',
-    alternateName: 'SAVORIA Fine Dining',
+    '@type': 'TravelAgency',
+    '@id': 'https://adventure.com',
+    name: 'Adventure',
+    alternateName: 'Adventure Hiking & Outdoor Expeditions',
     description:
-      "SAVORIA Café brings an elevated culinary experience with premium ingredients, handcrafted dishes, and luxurious ambiance.",
-    url: 'https://savoriacafe.com',
-    logo: 'https://savoriacafe.com/logo.png',
-    image: 'https://savoriacafe.com/og-image.jpg',
-    telephone: '+94XXXXXXXXX',
-    email: 'info@savoriacafe.com',
-    priceRange: '$$',
+      "Adventure offers expert-led hiking expeditions and outdoor adventures through stunning landscapes worldwide. Experience transformative journeys with professional guides.",
+    url: 'https://adventure.com',
+    logo: 'https://adventure.com/logo.png',
+    image: 'https://adventure.com/og-image.jpg',
+    telephone: '+1 (999) 999-9999',
+    email: 'support@ditych.com',
+    priceRange: '$$-$$$',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Your Street Address',
-      addressLocality: 'Colombo',
-      addressRegion: 'Western Province',
-      postalCode: '00000',
-      addressCountry: 'LK'
+      streetAddress: 'Independence Square 14',
+      addressLocality: 'Kyiv',
+      addressRegion: 'Kyiv Oblast',
+      postalCode: '01001',
+      addressCountry: 'UA'
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 6.9271,
-      longitude: 79.8612
+      latitude: 50.4501,
+      longitude: 30.5234
     },
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '08:00',
-        closes: '22:00'
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Saturday', 'Sunday'],
         opens: '09:00',
-        closes: '23:00'
+        closes: '17:00'
       }
     ],
     sameAs: [
-      'https://www.facebook.com/savoriacafe',
-      'https://www.instagram.com/savoriacafe',
-      'https://twitter.com/savoriacafe',
-      'https://www.youtube.com/@savoriacafe',
-      'https://www.tiktok.com/@savoriacafe'
+      'https://www.facebook.com/adventure',
+      'https://www.instagram.com/adventure',
+      'https://twitter.com/adventure',
+      'https://www.youtube.com/@adventure'
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+94XXXXXXXXX',
+      telephone: '+1 (999) 999-9999',
       contactType: 'Customer Service',
-      availableLanguage: ['en', 'si'],
-      areaServed: 'LK'
+      availableLanguage: ['en'],
+      areaServed: ['US', 'CA', 'EU', 'UA']
     },
-    servesCuisine: ['Continental', 'Fusion', 'Coffee', 'Desserts'],
-    hasMenu: 'https://savoriacafe.com/menu',
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Adventure Programs',
+      itemListElement: [
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Hiking Adventures',
+            description: 'Guided hiking expeditions through mountains and wilderness'
+          }
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Mountain Biking',
+            description: 'Thrilling mountain biking experiences on scenic trails'
+          }
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Trail Running',
+            description: 'Guided trail running programs for all skill levels'
+          }
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Outdoor School',
+            description: 'Educational outdoor programs for youth and families'
+          }
+        }
+      ]
+    }
   }
 
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={dmSans.variable}>
       <head>
         <script
           type="application/ld+json"
@@ -195,7 +227,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
       </head>
 
-      <body className="font-sans">
+      <body className="font-dm-sans">
         {children}
         <WhatsAppButton />
       </body>
