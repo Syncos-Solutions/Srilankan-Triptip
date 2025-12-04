@@ -189,7 +189,7 @@ const menuItems = [
   { label: 'TRIPS', href: '/trips', isAccent: false },
   { label: 'STORIES', href: '/stories', isAccent: false },
   { label: 'CONTACT US', href: '/contact', isAccent: false },
-  { label: 'BUY TEMPLATE', href: '/buy', isAccent: true },
+  
 ];
 
 // ============================================================================

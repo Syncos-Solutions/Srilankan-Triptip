@@ -1,7 +1,7 @@
 // components/Navbar.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 // Logo Icon Component
@@ -59,25 +59,20 @@ const menuItems = [
   { label: 'TRIPS', href: '/trips', isAccent: false },
   { label: 'STORIES', href: '/stories', isAccent: false },
   { label: 'CONTACT US', href: '/contact', isAccent: false },
-  { label: 'BUY TEMPLATE', href: '/buy', isAccent: true },
+  
 ];
 
-// Types
-
+// Props Interface
 export interface NavbarProps {
-  isIntro: boolean;
-  isMenuOpen: boolean;
-  onMenuOpen: () => void;
-  onMenuClose: () => void;
+  isIntro?: boolean;
 }
 
+const Navbar: React.FC<NavbarProps> = ({ isIntro = false }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-const Navbar: React.FC<NavbarProps> = ({
-  isIntro,
-  isMenuOpen,
-  onMenuOpen,
-  onMenuClose,
-}) => {
+  const handleMenuOpen = () => setIsMenuOpen(true);
+  const handleMenuClose = () => setIsMenuOpen(false);
+
   return (
     <>
       {/* Main Navbar */}
@@ -95,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({
         </Link>
 
         <button
-          onClick={onMenuOpen}
+          onClick={handleMenuOpen}
           aria-label="Open navigation menu"
           className={`
             p-2 -mr-2 transition-colors duration-700 ease-in-out
@@ -123,14 +118,14 @@ const Navbar: React.FC<NavbarProps> = ({
           <Link
             href="/"
             aria-label="Homepage"
-            onClick={onMenuClose}
+            onClick={handleMenuClose}
             className="text-gray-900 hover:opacity-80 transition-opacity"
           >
             <LogoIcon />
           </Link>
 
           <button
-            onClick={onMenuClose}
+            onClick={handleMenuClose}
             aria-label="Close navigation menu"
             className="p-2 -mr-2 text-gray-900 hover:text-gray-500 transition-colors"
           >
@@ -157,7 +152,7 @@ const Navbar: React.FC<NavbarProps> = ({
               >
                 <Link
                   href={item.href}
-                  onClick={onMenuClose}
+                  onClick={handleMenuClose}
                   className={`
                     text-2xl sm:text-3xl md:text-4xl lg:text-5xl
                     font-bold tracking-wide

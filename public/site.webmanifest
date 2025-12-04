@@ -1,11 +1,7 @@
+
 {
-  "name": "OXYGEN Gym - More Than A Gym, It's A Lifestyle",
-  "short_name": "OXYGEN Gym",
-  "description": "Join a community that pushes limits and celebrates every victory — big or small.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "name": "Adventure",
+  "short_name": "Adventure",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -17,5 +13,8 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "theme_color": "#ff5b3b",
+  "background_color": "#f5f1ee",
+  "display": "standalone"
 }

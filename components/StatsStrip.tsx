@@ -1,48 +1,123 @@
-// components/StatsStrip.tsx
-'use client'
+'use client';
 
-interface Stat {
-  value: string
-  description: string
-}
+import React, { useState, useEffect, useRef } from 'react';
 
-const stats: Stat[] = [
+type StatItem = {
+  id: string;
+  label: string;
+  description: string;
+  endValue: number;
+  suffix?: string;
+};
+
+const STATS: StatItem[] = [
   {
-    value: '98%',
-    description: 'of members feel stronger and more energized in the first 2 months.',
+    id: 'adventurers',
+    label: 'Our Adventurers',
+    description: 'Memorable experiences in diverse landscapes worldwide.',
+    endValue: 878,
   },
   {
-    value: '100%',
-    description: 'Trained professional coaches for guidance & support.',
+    id: 'trails',
+    label: 'Unique Trails Offered',
+    description: 'Diverse challenges across stunning landscapes.',
+    endValue: 500,
+    suffix: '+',
   },
   {
-    value: '150+',
-    description: 'Exercices — HIIT, Strength, Yoga, Mobility, and more.',
+    id: 'satisfaction',
+    label: 'Satisfaction Rate',
+    description: 'Exceptional experiences rated highly by participants.',
+    endValue: 97,
+    suffix: '%',
   },
-]
+];
 
-export default function StatsStrip() {
+const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+export default function StatsHighlightSection() {
+  const [values, setValues] = useState<number[]>(() => STATS.map(() => 0));
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || hasAnimated) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const startAnimation = () => {
+      if (hasAnimated) return;
+      setHasAnimated(true);
+
+      if (prefersReducedMotion) {
+        setValues(STATS.map(stat => stat.endValue));
+        return;
+      }
+
+      const duration = 1500;
+      const start = performance.now();
+
+      const tick = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = easeOutCubic(progress);
+        setValues(STATS.map(stat => Math.round(stat.endValue * eased)));
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        }
+      };
+
+      requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+            startAnimation();
+          }
+        });
+      },
+      {
+        threshold: [0.3],
+      }
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasAnimated]);
+
   return (
-    <section className="w-full bg-white py-12 md:py-16 lg:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="pt-8 first:pt-0 md:pt-0 md:px-8 lg:px-12 first:md:pl-0 last:md:pr-0"
-            >
-              <div className="space-y-2 md:space-y-3">
-                <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
-                  {stat.value}
-                </div>
-                <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                  {stat.description}
-                </p>
-              </div>
+    <section
+      ref={sectionRef}
+      className="bg-[#e8e4df] py-12 md:py-16 lg:py-20"
+      aria-label="Adventure statistics"
+    >
+      <div className="max-w-[1500px] mx-auto px-4 md:px-8 lg:mt-[80px] lg:mb-[60px]">
+        <div className="grid gap-10 text-center md:grid-cols-3 md:gap-12">
+          {STATS.map((stat, index) => (
+            <div key={stat.id} className="flex flex-col items-center">
+              <p className="lg:text-8xl md:text-4xl font-extrabold text-neutral-900">
+                <span>{values[index]}</span>
+                {stat.suffix && (
+                  <span className="inline-block align-top lg:text-7xl md:text-3xl ml-1">
+                    {stat.suffix}
+                  </span>
+                )}
+              </p>
+              <h3 className="mt-4 text-base md:text-lg font-dm-sans font-semibold text-neutral-900">
+                {stat.label}
+              </h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-700 leading-relaxed">
+                {stat.description}
+              </p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

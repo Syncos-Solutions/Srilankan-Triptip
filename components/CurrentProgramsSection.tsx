@@ -209,7 +209,7 @@ const CurrentProgramsSection: React.FC = () => {
 
               {/* Text Content */}
               <div>
-                <h3 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-5 tracking-tight">
+                <h3 className="text-3xl sm:text-4xl font-dm-sans font-semibold text-gray-900 mb-5 tracking-tight">
                   {program.title}
                 </h3>
                 <div className="space-y-4">

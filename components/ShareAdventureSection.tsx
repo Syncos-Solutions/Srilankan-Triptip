@@ -179,7 +179,7 @@ const ShareAdventureSection: React.FC = () => {
               {duplicatedPosts.map((post, index) => (
                 <div
                   key={`${post.id}-${index}`}
-                  className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-sm overflow-hidden shadow-lg group bg-gray-200 flex-shrink-0"
+                  className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-md overflow-hidden shadow-lg group bg-gray-200 flex-shrink-0"
                 >
                   <Image
                     src={post.src}
