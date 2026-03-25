@@ -1,15 +1,15 @@
 
-import FutureTripsSection from "@/components/FutureTripsSection";
+import Aboutsection from "@/components/Aboutsection";
 import ShareAdventureSection from "@/components/ShareAdventureSection";
 // import AboutUs from "@/components/About";
 // import AmbianceSection from "@/components/AmbianceSection";
 // import TestimonialsSection from "@/components/TestimonialsSection";
 // import NewsArticlesSection from "@/components/NewsArticlesSection";
-import AdventureFooter from "@/components/Footer";
-import CurrentProgramsSection from "@/components/CurrentProgramsSection";
+import FooterSection from "@/components/Footer";
+import CustomPlanningSection from "@/components/CurrentProgramsSection";
 import AdventureHero from "@/components/AdventureHero";
-import StatsHighlightSection from "@/components/StatsStrip";
-import TourPreparationSection from "@/components/FeatureTile";
+//import StatsHighlightSection from "@/components/StatsStrip";
+//import TourPreparationSection from "@/components/FeatureTile";
 
 
 
@@ -17,12 +17,12 @@ export default function Home() {
   return (
     <main className="relative min-h-screen bg-primary-dark">
       < AdventureHero/>
-      <StatsHighlightSection />
+      {/* <StatsHighlightSection /> */}
       
-      <FutureTripsSection />
-      <CurrentProgramsSection />
+      <Aboutsection />
+      <CustomPlanningSection />
       
-      <TourPreparationSection />
+      {/* <TourPreparationSection /> */}
       <ShareAdventureSection/>
       
       {/* <AboutUs/>
@@ -31,7 +31,7 @@ export default function Home() {
       <TestimonialsSection />
       <NewsArticlesSection /> */}
       
-      <AdventureFooter/>
+      <FooterSection/>
     </main>
   );
 }

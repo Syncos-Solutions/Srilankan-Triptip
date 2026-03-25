@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // ============================================================================
 // VIDEO DATA
@@ -66,21 +67,6 @@ const CloseIcon: React.FC = () => (
   >
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
-const LogoIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg
-    className={className}
-    width="44"
-    height="44"
-    viewBox="0 0 44 44"
-    fill="none"
-  >
-    <circle cx="14" cy="22" r="9" stroke="currentColor" strokeWidth="2" />
-    <circle cx="22" cy="14" r="9" stroke="currentColor" strokeWidth="2" />
-    <circle cx="30" cy="22" r="9" stroke="currentColor" strokeWidth="2" />
-    <circle cx="22" cy="30" r="9" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
 
@@ -149,6 +135,21 @@ const ArrowIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
   </svg>
 );
 
+const ChevronRightIcon: React.FC = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -182,18 +183,53 @@ interface ContactCardProps {
 }
 
 // ============================================================================
-// MENU ITEMS
+// MENU ITEMS - Updated Navigation
 // ============================================================================
 const menuItems = [
-  { label: 'HOME', href: '/', isAccent: false },
-  { label: 'TRIPS', href: '/trips', isAccent: false },
-  { label: 'STORIES', href: '/stories', isAccent: false },
-  { label: 'CONTACT US', href: '/contact', isAccent: false },
-  
+  { 
+    label: 'Home', 
+    href: '/', 
+    description: 'Discover the pearl of the Indian Ocean'
+  },
+  { 
+    label: 'About', 
+    href: '/about', 
+    description: 'Learn about our story and mission'
+  },
+  { 
+    label: 'Tours', 
+    href: '/tours', 
+    description: 'Curated experiences across Sri Lanka'
+  },
+  { 
+    label: 'Taxi', 
+    href: '/taxi', 
+    description: 'Comfortable & reliable transportation'
+  },
+  { 
+    label: 'Custom Planning', 
+    href: '/custom-planning', 
+    description: 'Tailor-made journeys just for you'
+  },
+  { 
+    label: 'Gallery', 
+    href: '/gallery', 
+    description: 'Visual stories from our adventures'
+  },
+  { 
+    label: 'Blog', 
+    href: '/blog', 
+    description: 'Travel tips and destination guides'
+  },
+  { 
+    label: 'Contact Us', 
+    href: '/contact', 
+    description: 'Get in touch with our team'
+  },
 ];
 
 // ============================================================================
-// NAVBAR COMPONENT
+// NAVBAR COMPONENT - Enhanced
 // ============================================================================
 const Navbar: React.FC<NavbarProps> = ({ isIntro, onMenuOpen }) => {
   return (
@@ -202,20 +238,37 @@ const Navbar: React.FC<NavbarProps> = ({ isIntro, onMenuOpen }) => {
         href="/"
         aria-label="Homepage"
         className={`
-          transition-colors duration-700 ease-in-out
+          transition-all duration-700 ease-in-out
           ${isIntro ? 'text-white' : 'text-gray-900'}
-          hover:opacity-80
+          hover:opacity-80 transform hover:scale-105
         `}
       >
-        <LogoIcon />
+        <Image 
+          src="./SLtriptipLogo.svg" 
+          className={`
+            border transition-all duration-500
+            ${isIntro 
+              ? 'border-white/30 hover:border-white/60' 
+              : 'border-gray-300 hover:border-[#5e17eb]'
+            }
+            rounded-sm
+          `}
+          alt="SL Triptip Logo" 
+          width={100} 
+          height={50} 
+        />
       </Link>
 
       <button
         onClick={onMenuOpen}
         aria-label="Open navigation menu"
         className={`
-          p-2 -mr-2 transition-colors duration-700 ease-in-out
-          ${isIntro ? 'text-white hover:text-white/70' : 'text-gray-900 hover:text-gray-500'}
+          p-2 -mr-2 rounded-lg
+          transition-all duration-700 ease-in-out
+          ${isIntro 
+            ? 'text-white hover:text-white/70 hover:bg-white/10' 
+            : 'text-gray-900 hover:text-[#5e17eb] hover:bg-[#5e17eb]/5'
+          }
         `}
       >
         <HamburgerIcon />
@@ -225,76 +278,254 @@ const Navbar: React.FC<NavbarProps> = ({ isIntro, onMenuOpen }) => {
 };
 
 // ============================================================================
-// MENU OVERLAY COMPONENT
+// MENU OVERLAY COMPONENT - Premium Redesign
 // ============================================================================
 const MenuOverlay: React.FC<MenuOverlayProps> = ({ isOpen, onClose }) => {
   return (
-    <div
-      className={`
-        fixed inset-0 z-50 bg-white
-        flex flex-col
-        transition-all duration-500 ease-in-out
-        ${isOpen 
-          ? 'opacity-100 visible translate-y-0' 
-          : 'opacity-0 invisible -translate-y-4'
-        }
-      `}
-    >
-      <div className="flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12 lg:py-8">
-        <Link
-          href="/"
-          aria-label="Homepage"
-          onClick={onClose}
-          className="text-gray-900 hover:opacity-80 transition-opacity"
-        >
-          <LogoIcon />
-        </Link>
+    <>
+      {/* Backdrop with blur */}
+      <div
+        className={`
+          fixed inset-0 z-50 bg-white/95 backdrop-blur-md
+          transition-all duration-500 ease-out
+          ${isOpen 
+            ? 'opacity-100 visible' 
+            : 'opacity-0 invisible'
+          }
+        `}
+        onClick={onClose}
+      />
 
-        <button
-          onClick={onClose}
-          aria-label="Close navigation menu"
-          className="p-2 -mr-2 text-gray-900 hover:text-gray-500 transition-colors"
-        >
-          <CloseIcon />
-        </button>
-      </div>
+      {/* Menu Content */}
+      <div
+        className={`
+          fixed inset-0 z-50 
+          flex flex-col
+          transition-all duration-500 ease-out
+          pointer-events-none
+          ${isOpen 
+            ? 'opacity-100 visible' 
+            : 'opacity-0 invisible'
+          }
+        `}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12 lg:py-8 pointer-events-auto">
+          <Link
+            href="/"
+            aria-label="Homepage"
+            onClick={onClose}
+            className="text-gray-900 hover:opacity-80 transition-all duration-300 transform hover:scale-105"
+          >
+            <Image 
+              src="./SLtriptipLogo.svg" 
+              alt="SL Triptip Logo" 
+              width={100} 
+              height={50}
+              className="border border-gray-300 hover:border-[#5e17eb] transition-colors duration-300 rounded-sm"
+            />
+          </Link>
 
-      <div className="flex-1 flex items-center justify-center">
-        <ul className="flex flex-col items-center gap-5 sm:gap-6 lg:gap-8">
-          {menuItems.map((item, index) => (
-            <li
-              key={item.label}
-              style={{ 
-                transitionDelay: isOpen ? `${index * 75}ms` : '0ms' 
-              }}
-              className={`
-                transition-all duration-500 ease-out
-                ${isOpen 
-                  ? 'opacity-100 translate-y-0' 
-                  : 'opacity-0 translate-y-4'
-                }
-              `}
-            >
-              <Link
-                href={item.href}
+          <button
+            onClick={onClose}
+            aria-label="Close navigation menu"
+            className="p-2 -mr-2 text-gray-900 hover:text-[#5e17eb] hover:bg-[#5e17eb]/5 transition-all duration-300 rounded-lg"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+
+        {/* Main Menu Content */}
+        <div className="flex-1 overflow-y-auto pointer-events-auto">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-8 lg:py-12">
+            
+            {/* Desktop: Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+              
+              {/* Left Column - Navigation */}
+              <div className="lg:col-span-7">
+                <div className="space-y-1 sm:space-y-2">
+                  {menuItems.map((item, index) => (
+                    <div
+                      key={item.label}
+                      style={{ 
+                        transitionDelay: isOpen ? `${index * 50 + 100}ms` : '0ms' 
+                      }}
+                      className={`
+                        transition-all duration-500 ease-out
+                        ${isOpen 
+                          ? 'opacity-100 translate-x-0' 
+                          : 'opacity-0 -translate-x-8'
+                        }
+                      `}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={onClose}
+                        className="group block py-3 sm:py-4 border-b border-gray-200 hover:border-[#5e17eb]/30 transition-all duration-300"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-2xl sm:text-3xl lg:text-3xl xl:text-3xl font-light text-gray-900 group-hover:text-[#5e17eb] transition-colors duration-300 tracking-tight">
+                              {item.label}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 group-hover:text-gray-700 transition-colors duration-300">
+                              {item.description}
+                            </p>
+                          </div>
+                          <div className="ml-4 text-gray-400 group-hover:text-[#5e17eb] transform group-hover:translate-x-2 transition-all duration-300">
+                            <ChevronRightIcon />
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column - Featured Content */}
+              <div className="lg:col-span-5">
+                <div
+                  style={{ 
+                    transitionDelay: isOpen ? '400ms' : '0ms' 
+                  }}
+                  className={`
+                    sticky top-8 space-y-8
+                    transition-all duration-700 ease-out
+                    ${isOpen 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-8'
+                    }
+                  `}
+                >
+                  {/* Featured Card */}
+                  <div className="bg-gradient-to-br from-[#f4f4f4] to-white p-8  border border-gray-200 hover:border-[#5e17eb]/50 transition-all duration-500 hover:shadow-xl">
+                    <div className="space-y-4">
+                      <div className="inline-block px-3 py-1 bg-[#5e17eb]/10 ">
+                        <span className="text-xs font-semibold text-[#5e17eb] uppercase tracking-wider">
+                          Special Offer
+                        </span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-gray-900">
+                        Start Your Journey Today
+                      </h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Experience the magic of Sri Lanka with our expertly curated tours. 
+                        Book now and get exclusive discounts on your first adventure.
+                      </p>
+                      <Link
+                        href="/tours"
+                        onClick={onClose}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#5e17eb] text-white  hover:bg-[#1800ad] transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                      >
+                        <span className="font-semibold text-sm">Explore Tours</span>
+                        <ArrowIcon className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="space-y-6">
+                    <div>
+                      <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                        Get in Touch
+                      </h5>
+                      <div className="space-y-2">
+                        <a 
+                          href="mailto:info@sltriptip.com" 
+                          className="block text-sm text-gray-700 hover:text-[#5e17eb] transition-colors duration-300"
+                        >
+                          info@srilankantriptip.com
+                        </a>
+                        <a 
+                          href="tel:+94123456789" 
+                          className="block text-sm text-gray-700 hover:text-[#5e17eb] transition-colors duration-300"
+                        >
+                          +94 12 345 6789
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Social Links */}
+                    <div>
+                      <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                        Follow Our Journey
+                      </h5>
+                      <div className="flex gap-3">
+                        <a
+                          href="https://instagram.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Follow us on Instagram"
+                          className="w-10 h-10  border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#5e17eb] hover:text-[#5e17eb] hover:bg-[#5e17eb]/5 transition-all duration-300 hover:scale-110 transform"
+                        >
+                          <InstagramIcon />
+                        </a>
+                        <a
+                          href="https://facebook.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Follow us on Facebook"
+                          className="w-10 h-10  border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#1800ad] hover:text-[#1800ad] hover:bg-[#1800ad]/5 transition-all duration-300 hover:scale-110 transform"
+                        >
+                          <FacebookIcon />
+                        </a>
+                        <a
+                          href="https://youtube.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Subscribe on YouTube"
+                          className="w-10 h-10  border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#5e17eb] hover:text-[#5e17eb] hover:bg-[#5e17eb]/5 transition-all duration-300 hover:scale-110 transform"
+                        >
+                          <YouTubeIcon />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div 
+          style={{ 
+            transitionDelay: isOpen ? '500ms' : '0ms' 
+          }}
+          className={`
+            border-t border-gray-200 px-5 py-4 sm:px-8 sm:py-5 lg:px-12 pointer-events-auto
+            transition-all duration-500 ease-out
+            ${isOpen 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-4'
+            }
+          `}
+        >
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-gray-500">
+              © 2026 Srilankan Triptip. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-xs">
+              <Link 
+                href="/privacy" 
                 onClick={onClose}
-                className={`
-                  text-2xl sm:text-3xl md:text-4xl lg:text-5xl
-                  font-bold tracking-wide
-                  transition-colors duration-300
-                  ${item.isAccent
-                    ? 'text-[#ff5b3b] hover:text-[#e04a2d]'
-                    : 'text-gray-900 hover:text-gray-400'
-                  }
-                `}
+                className="text-gray-500 hover:text-[#5e17eb] transition-colors duration-300"
               >
-                {item.label}
+                Privacy Policy
               </Link>
-            </li>
-          ))}
-        </ul>
+              <Link 
+                href="/terms" 
+                onClick={onClose}
+                className="text-gray-500 hover:text-[#5e17eb] transition-colors duration-300"
+              >
+                Terms of Service
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -314,13 +545,13 @@ const SocialIconButton: React.FC<SocialIconButtonProps> = ({
     aria-label={label}
     className={`
       w-10 h-10 sm:w-11 sm:h-11
-      rounded-sm border
+      border
       flex items-center justify-center
       transition-all duration-500 ease-in-out
-      hover:scale-110
+      hover:scale-110 transform
       ${isIntro
         ? 'border-white/30 text-white hover:bg-white/10 hover:border-white/50'
-        : 'border-gray-400 text-gray-600 hover:border-gray-900 hover:text-gray-900 hover:bg-gray-100'
+        : 'border-gray-300 text-gray-600 hover:border-[#5e17eb] hover:text-[#5e17eb] hover:bg-[#5e17eb]/5'
       }
     `}
   >
@@ -373,7 +604,7 @@ const VideoTile: React.FC<VideoTileProps> = ({
   return (
     <div
       className={`
-        relative overflow-hidden rounded-sm
+        relative overflow-hidden 
         bg-gray-200
         ${className}
       `}
@@ -405,9 +636,9 @@ const VideoTile: React.FC<VideoTileProps> = ({
 
       <div
         className={`
-          absolute inset-0 bg-[#a89680] pointer-events-none z-10
+          absolute inset-0 bg-gradient-to-br from-[#5e17eb]/20 to-transparent pointer-events-none z-10
           transition-opacity duration-700 ease-in-out
-          ${isIntro ? 'opacity-40' : 'opacity-0'}
+          ${isIntro ? 'opacity-30' : 'opacity-0'}
         `}
         aria-hidden="true"
       />
@@ -422,14 +653,14 @@ const ContactCard: React.FC<ContactCardProps> = ({ isIntro, className = '' }) =>
   <Link
     href="/contact"
     className={`
-      block relative overflow-hidden rounded-sm
+      block relative overflow-hidden 
       p-6 sm:p-7 lg:p-8
       flex flex-col justify-between
       transition-all duration-500 ease-in-out
       group cursor-pointer
       ${isIntro
         ? 'bg-white/10 border border-white/20 hover:bg-white/15 hover:border-white/30'
-        : 'bg-[#f9f7f5] border border-gray-300 hover:border-gray-500 hover:shadow-lg'
+        : 'bg-[#f4f4f4] border border-gray-300 hover:border-[#5e17eb] hover:shadow-xl hover:shadow-[#5e17eb]/10'
       }
       ${className}
     `}
@@ -439,7 +670,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ isIntro, className = '' }) =>
         className={`
           text-lg sm:text-xl lg:text-2xl font-semibold mb-2
           transition-colors duration-500
-          ${isIntro ? 'text-white' : 'text-gray-900'}
+          ${isIntro ? 'text-white' : 'text-gray-900 group-hover:text-[#5e17eb]'}
         `}
       >
         Contact
@@ -448,7 +679,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ isIntro, className = '' }) =>
         className={`
           text-sm sm:text-xs md:text-xs lg:text-base leading-relaxed
           transition-colors duration-500
-          ${isIntro ? 'text-white/80' : 'text-gray-500'}
+          ${isIntro ? 'text-white/80' : 'text-gray-600'}
         `}
       >
         Got a question? Don&apos;t hesitate to ask us.
@@ -460,7 +691,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ isIntro, className = '' }) =>
         self-end mt-6
         transition-all duration-300
         group-hover:translate-x-1 group-hover:-translate-y-1
-        ${isIntro ? 'text-white/90' : 'text-gray-800'}
+        ${isIntro ? 'text-white/90' : 'text-[#5e17eb]'}
       `}
     >
       <ArrowIcon />
@@ -509,22 +740,29 @@ const AdventureHero: React.FC = () => {
       <div className="relative z-10 min-h-screen px-5 pt-24 pb-10 sm:px-8 sm:pt-28 sm:pb-12 lg:px-12 lg:pt-32 lg:pb-16">
         <div className="max-w-[1800px] mx-auto h-full">
           
-          {/* HERO TITLE - Overlapping the grid */}
-          <div className="relative z-20 mb-6 lg:mb-0 lg:absolute lg:ml-12 lg:top-4 lg:mt-[120px]  xl:left-0 xl:top-0">
+          {/* HERO TITLE - Enhanced with purple shade */}
+          <div className="relative z-20 mb-6 font-dm-sans uppercase lg:mb-0 lg:absolute lg:ml-12 lg:top-4 lg:mt-[120px] xl:left-0 xl:top-0">
             <h1
               className={`
-                text-[3.5rem] leading-[0.82]
-                sm:text-[5rem]
+                text-[3.5rem] 
+                sm:text-[4rem]
                 md:text-[6rem]
                 lg:text-[7rem]
-                xl:text-[8.5rem]
-                2xl:text-[10rem]
-                font-black tracking-[-0.04em]
-                transition-colors duration-700 ease-in-out
-                ${isIntro ? 'text-white' : 'text-[#2d2d2d]'}
+                xl:text-[8rem]
+                2xl:text-[9rem]
+                tracking-[-0.04em]
+                font-bold
+                transition-all duration-700 ease-in-out
+                ${isIntro 
+                  ? 'text-white' 
+                  : 'bg-gradient-to-br from-[#f7f7f7] via-[#f7f7f7] to-[#f7f7f7] bg-clip-text text-transparent'
+                }
               `}
+              style={{
+                textShadow: isIntro ? 'none' : 'bg-[#f7f7f7]',
+              }}
             >
-              ADVENTURE
+              S r i L a n k a
             </h1>
           </div>
 
@@ -555,8 +793,8 @@ const AdventureHero: React.FC = () => {
                   `}
                 >
                   Explore the wonders of the great outdoors with our premier
-                  hiking website. Immerse yourself in stunning vistas, tranquil
-                  forests, and invigorating trails.
+                  travel experiences. Immerse yourself in stunning vistas, tranquil
+                  beaches, and invigorating adventures across Sri Lanka.
                 </p>
               </div>
 
@@ -601,7 +839,7 @@ const AdventureHero: React.FC = () => {
             {/* ================================================ */}
             {/* RIGHT COLUMN - PROFESSIONAL VIDEO GRID */}
             {/* ================================================ */}
-            <div className="lg:col-span-8 ">
+            <div className="lg:col-span-8">
               
               {/* ============================================== */}
               {/* DESKTOP GRID (lg and up) - Modern Asymmetric */}
@@ -609,8 +847,6 @@ const AdventureHero: React.FC = () => {
               <div className="hidden lg:block h-[calc(100vh-12rem)] min-h-[700px]">
                 <div className="grid grid-cols-12 grid-rows-12 gap-4 h-full">
                   
-                  {/* Row 1-5: Top Section */}
-                  {/* Video 1 - Large hero video (top left) */}
                   <VideoTile
                     src={videos[0].src}
                     alt={videos[0].alt}
@@ -618,7 +854,6 @@ const AdventureHero: React.FC = () => {
                     className="col-span-7 row-span-7 mt-[200px] ml-[250px]"
                   />
                   
-                  {/* Video 2 - Tall portrait (top right) */}
                   <VideoTile
                     src={videos[1].src}
                     alt={videos[1].alt}
@@ -626,8 +861,6 @@ const AdventureHero: React.FC = () => {
                     className="col-span-5 row-span-4"
                   />
                   
-                  {/* Row 6-12: Bottom Section */}
-                  {/* Video 3 - Medium square (bottom left) */}
                   <VideoTile
                     src={videos[2].src}
                     alt={videos[2].alt}
@@ -635,7 +868,6 @@ const AdventureHero: React.FC = () => {
                     className="col-span-5 row-span-5"
                   />
                   
-                  {/* Video 4 - Wide landscape (bottom center) */}
                   <VideoTile
                     src={videos[3].src}
                     alt={videos[3].alt}
@@ -643,19 +875,16 @@ const AdventureHero: React.FC = () => {
                     className="col-span-4 row-span-6"
                   />
                   
-                  
-                  
-                  {/* Video 5 - Small accent (bottom right) */}
                   <VideoTile
                     src={videos[4].src}
                     alt={videos[4].alt}
                     isIntro={isIntro}
                     className="col-span-3 row-span-6"
                   />
-                  {/* Contact Card - Bottom center-right */}
+                  
                   <ContactCard
                     isIntro={isIntro}
-                    className="col-span-5 row-span-4 "
+                    className="col-span-5 row-span-4"
                   />
                 </div>
               </div>
@@ -666,7 +895,6 @@ const AdventureHero: React.FC = () => {
               <div className="hidden md:block lg:hidden h-[800px]">
                 <div className="grid grid-cols-8 grid-rows-10 gap-4 h-full">
                   
-                  {/* Video 1 - Large hero */}
                   <VideoTile
                     src={videos[0].src}
                     alt={videos[0].alt}
@@ -674,7 +902,6 @@ const AdventureHero: React.FC = () => {
                     className="col-span-5 row-span-4"
                   />
                   
-                  {/* Video 2 - Tall right */}
                   <VideoTile
                     src={videos[1].src}
                     alt={videos[1].alt}
@@ -682,7 +909,6 @@ const AdventureHero: React.FC = () => {
                     className="col-span-3 row-span-5"
                   />
                   
-                  {/* Video 3 - Medium */}
                   <VideoTile
                     src={videos[2].src}
                     alt={videos[2].alt}
@@ -690,7 +916,6 @@ const AdventureHero: React.FC = () => {
                     className="col-span-3 row-span-3"
                   />
                   
-                  {/* Video 4 - Medium */}
                   <VideoTile
                     src={videos[3].src}
                     alt={videos[3].alt}
@@ -698,13 +923,11 @@ const AdventureHero: React.FC = () => {
                     className="col-span-2 row-span-3"
                   />
                   
-                  {/* Contact Card */}
                   <ContactCard
                     isIntro={isIntro}
                     className="col-span-3 row-span-5"
                   />
                   
-                  {/* Video 5 - Bottom accent */}
                   <VideoTile
                     src={videos[4].src}
                     alt={videos[4].alt}
@@ -719,7 +942,6 @@ const AdventureHero: React.FC = () => {
               {/* ============================================== */}
               <div className="md:hidden space-y-4">
                 
-                {/* Video 1 - Hero */}
                 <VideoTile
                   src={videos[0].src}
                   alt={videos[0].alt}
@@ -727,7 +949,6 @@ const AdventureHero: React.FC = () => {
                   className="w-full aspect-[4/3]"
                 />
                 
-                {/* Two column row */}
                 <div className="grid grid-cols-2 gap-4">
                   <VideoTile
                     src={videos[1].src}
@@ -743,7 +964,6 @@ const AdventureHero: React.FC = () => {
                   />
                 </div>
                 
-                {/* Full width video */}
                 <VideoTile
                   src={videos[3].src}
                   alt={videos[3].alt}
@@ -751,7 +971,6 @@ const AdventureHero: React.FC = () => {
                   className="w-full aspect-[16/9]"
                 />
                 
-                {/* Two column row */}
                 <div className="grid grid-cols-2 gap-4">
                   <VideoTile
                     src={videos[4].src}
