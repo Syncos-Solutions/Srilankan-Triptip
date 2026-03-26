@@ -166,7 +166,7 @@ const PullQuote: React.FC<{ text: string }> = ({ text }) => {
 
   return (
     <blockquote
-      ref={ref as React.RefObject<HTMLElement>}
+      ref={ref as React.RefObject<HTMLQuoteElement>}
       className={`my-14 lg:my-20 border-l-4 pl-8 lg:pl-12 transition-all duration-700 ${
         inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
       }`}
