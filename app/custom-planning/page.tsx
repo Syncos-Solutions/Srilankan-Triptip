@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import FooterSection from '@/components/FooterSection';
+
 import Footer from '@/components/Footer';
 
 // ─────────────────────────────────────────────
