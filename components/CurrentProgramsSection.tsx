@@ -76,7 +76,7 @@ const CustomPlanningSection: React.FC = () => {
         BESPOKE
       </span>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-20 relative z-10">
+      <div className="max-w-[1800px] mx-auto px-6 sm:px-10 lg:px-12 relative z-10">
         
         {/* ── HEADER ────────────────────────────── */}
         <div 

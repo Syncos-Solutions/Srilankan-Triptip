@@ -103,7 +103,7 @@ const AboutSection: React.FC = () => {
       {/* ── HERO BAND ───────────────────────────── */}
       <div
         ref={heroRef.ref as React.RefObject<HTMLDivElement>}
-        className="relative bg-[#e8e4df] px-6 sm:px-10 lg:px-20 pt-24 pb-0"
+        className="relative bg-[#e8e4df] px-6 sm:px-10 lg:px-12 pt-24 pb-0"
       >
         {/* Background giant text watermark */}
         <span
@@ -114,7 +114,7 @@ const AboutSection: React.FC = () => {
           ABOUT
         </span>
 
-        <div className="relative z-10 max-w-[1400px] mx-auto">
+        <div className="relative z-10 max-w-[1800px] mx-auto">
           {/* Label */}
           <div
             className={`flex items-center gap-3 mb-10 transition-all duration-700 ease-out ${
@@ -183,7 +183,7 @@ const AboutSection: React.FC = () => {
         ref={statsRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-16"
       >
-        <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-[#e8e4df]">
+        <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-[#e8e4df]">
           {stats.map((s, i) => (
             <div
               key={s.label}
@@ -215,9 +215,9 @@ const AboutSection: React.FC = () => {
       {/* ── STORY + IMAGE BAND ──────────────────── */}
       <div
         ref={missionRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#e8e4df] px-6 sm:px-10 lg:px-20 py-24 lg:py-32"
+        className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-24 lg:py-32"
       >
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-center">
+        <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-center">
           {/* Left — story text */}
           <div
             className={`transition-all duration-800 ease-out ${
@@ -345,9 +345,9 @@ const AboutSection: React.FC = () => {
       {/* ── PILLARS / SERVICES BAND ─────────────── */}
       <div
         ref={pillarsRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-24 lg:py-32"
+        className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-24 lg:py-32"
       >
-        <div className="max-w-[1400px] mx-auto">
+        <div className="max-w-[1800px] mx-auto">
           {/* Section label */}
           <div
             className={`flex items-center gap-4 mb-16 transition-all duration-700 ease-out ${
@@ -422,8 +422,8 @@ const AboutSection: React.FC = () => {
       </div>
 
       {/* ── TRUST STRIP ─────────────────────────── */}
-      <div className="bg-[#e8e4df] px-6 sm:px-10 lg:px-20 py-16">
-        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+      <div className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-16">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
           <div className="max-w-xl">
             <h3
               className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-tight"

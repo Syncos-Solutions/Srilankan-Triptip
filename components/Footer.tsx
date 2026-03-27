@@ -67,7 +67,7 @@ const FooterSection: React.FC = () => {
       {/* ── GIANT BACKGROUND WATERMARK ────────── */}
       <span
         aria-hidden="true"
-        className="pointer-events-none select-none absolute left-1/2 -translate-x-1/2 top-[5%] text-[clamp(100px,22vw,350px)] font-black leading-none text-white/[0.02] tracking-tighter z-0"
+        className="pointer-events-none select-none absolute left-1/2 -translate-x-1/2 top-[5%] text-[clamp(100px,22vw,350px)] font-black leading-none text-white/[0.19] tracking-tighter z-0"
         style={{ fontFamily: "'Syne', 'DM Sans', sans-serif" }}
       >
         TRIPTIP
@@ -79,12 +79,12 @@ const FooterSection: React.FC = () => {
         style={{ background: 'radial-gradient(circle, #5e17eb, transparent 70%)' }}
       /> */}
 
-      <div className="max-w-[1500px] mx-auto px-6 sm:px-10 lg:px-20 relative z-10">
+      <div className="max-w-[1800px]  px-6 sm:px-10 lg:px-12 relative z-10">
         
         {/* ── TOP: CALL TO ACTION ───────────────── */}
         <div 
           ref={topRef.ref as React.RefObject<HTMLDivElement>}
-          className="mb-20 lg:mb-32 flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-b border-white/10 pb-16 lg:pb-24"
+          className="mb-10 lg:mb-4 flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-b border-white/10 pb-10 lg:pb-12"
         >
           <div className="max-w-3xl">
             <div
@@ -102,12 +102,12 @@ const FooterSection: React.FC = () => {
             </div>
 
             <h2
-              className={`text-[clamp(44px,6.5vw,96px)] font-black leading-[1.05] tracking-tight text-[#f4f4f4] transition-all duration-700 ease-out delay-100 ${
+              className={`text-[clamp(44px,6.5vw,96px)] md:mt-[140px] lg:mt-[220px] font-black leading-[1.05] tracking-tight text-[#f4f4f4] transition-all duration-700 ease-out delay-100 ${
                 topRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
               }`}
               style={{ fontFamily: "'Syne', 'DM Sans', sans-serif" }}
             >
-              Your Sri Lankan <br />
+              {/* Your Sri Lankan <br /> */}
               <span
                 style={{
                   background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)', // Adjusted slightly brighter for dark background

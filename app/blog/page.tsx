@@ -1,11 +1,14 @@
+// app/blog/page.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
-// ─────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
 interface BlogPost {
   id: string;
   slug: string;
@@ -20,9 +23,9 @@ interface BlogPost {
   featured?: boolean;
 }
 
-// ─────────────────────────────────────────────
-// Intersection Observer Hook
-// ─────────────────────────────────────────────
+// ============================================================================
+// CUSTOM HOOK - Intersection Observer
+// ============================================================================
 const useInView = (threshold = 0.1) => {
   const [inView, setInView] = useState(false);
   const [fired, setFired] = useState(false);
@@ -47,9 +50,9 @@ const useInView = (threshold = 0.1) => {
   return { ref, inView };
 };
 
-// ─────────────────────────────────────────────
-// Blog Data
-// ─────────────────────────────────────────────
+// ============================================================================
+// BLOG DATA
+// ============================================================================
 const blogPosts: BlogPost[] = [
   {
     id: '1',
@@ -134,9 +137,9 @@ const blogPosts: BlogPost[] = [
 
 const categories = ['All', 'Culture', 'Adventure', 'Food & Culture', 'Wildlife', 'Lifestyle'];
 
-// ─────────────────────────────────────────────
-// Featured Post Card
-// ─────────────────────────────────────────────
+// ============================================================================
+// FEATURED POST CARD COMPONENT
+// ============================================================================
 const FeaturedCard: React.FC<{ post: BlogPost }> = ({ post }) => {
   const [hovered, setHovered] = useState(false);
 
@@ -269,9 +272,9 @@ const FeaturedCard: React.FC<{ post: BlogPost }> = ({ post }) => {
   );
 };
 
-// ─────────────────────────────────────────────
-// Grid Post Card
-// ─────────────────────────────────────────────
+// ============================================================================
+// GRID POST CARD COMPONENT
+// ============================================================================
 const GridCard: React.FC<{ post: BlogPost; delay?: number; inView: boolean }> = ({
   post,
   delay = 0,
@@ -386,9 +389,9 @@ const GridCard: React.FC<{ post: BlogPost; delay?: number; inView: boolean }> = 
   );
 };
 
-// ─────────────────────────────────────────────
-// Side Story Card
-// ─────────────────────────────────────────────
+// ============================================================================
+// SIDE STORY CARD COMPONENT
+// ============================================================================
 const SideCard: React.FC<{ post: BlogPost; index: number; inView: boolean }> = ({
   post,
   index,
@@ -451,15 +454,20 @@ const SideCard: React.FC<{ post: BlogPost; index: number; inView: boolean }> = (
   );
 };
 
-// ─────────────────────────────────────────────
-// Main Blogs Page
-// ─────────────────────────────────────────────
-const BlogsPage: React.FC = () => {
+// ============================================================================
+// MAIN BLOG PAGE COMPONENT
+// ============================================================================
+const BlogPage: React.FC = () => {
+  // State Management
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [activeCategory, setActiveCategory] = useState('All');
+
+  // Intersection Observer Hooks
   const heroRef = useInView(0.1);
   const gridRef = useInView(0.08);
   const sideRef = useInView(0.08);
 
+  // Blog Posts
   const featured = blogPosts.find((p) => p.featured)!;
   const rest = blogPosts.filter((p) => !p.featured);
 
@@ -468,15 +476,38 @@ const BlogsPage: React.FC = () => {
       ? rest
       : rest.filter((p) => p.category === activeCategory);
 
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   return (
     <main
       className="bg-[#f4f4f4] overflow-hidden"
       style={{ fontFamily: "'DM Sans', 'Syne', sans-serif" }}
     >
-      {/* ── PAGE HEADER ────────────────────────────── */}
+      {/* Navbar */}
+      <Navbar
+        isIntro={false}
+        isMenuOpen={isMenuOpen}
+        onMenuOpen={() => setIsMenuOpen(true)}
+        onMenuClose={() => setIsMenuOpen(false)}
+      />
+
+      {/* ============================================================ */}
+      {/* PAGE HEADER */}
+      {/* ============================================================ */}
       <div
         ref={heroRef.ref as React.RefObject<HTMLDivElement>}
-        className="relative bg-[#ffffff] px-6 sm:px-10 lg:px-20 pt-24 pb-14 overflow-hidden"
+        className="relative bg-[#ffffff] px-6 sm:px-10 lg:pt-[200px] lg:px-12 pt-24 pb-14 overflow-hidden"
       >
         {/* Watermark */}
         <span
@@ -490,7 +521,7 @@ const BlogsPage: React.FC = () => {
           JOURNAL
         </span>
 
-        <div className="relative z-10 max-w-[1400px] mx-auto">
+        <div className="relative z-10 max-w-[1800px] mx-auto">
           {/* Label */}
           <div
             className={`flex items-center gap-3 mb-10 transition-all duration-700 ${
@@ -550,16 +581,20 @@ const BlogsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── FEATURED POST ──────────────────────────── */}
-      <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 pb-0">
-        <div className="max-w-[1400px] mx-auto">
+      {/* ============================================================ */}
+      {/* FEATURED POST */}
+      {/* ============================================================ */}
+      <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 pb-0">
+        <div className="max-w-[1800px] mx-auto">
           <FeaturedCard post={featured} />
         </div>
       </div>
 
-      {/* ── CATEGORY FILTER ────────────────────────── */}
-      <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-8 border-b border-[#e8e4df] sticky top-0 z-30 backdrop-blur-sm">
-        <div className="max-w-[1400px] mx-auto flex items-center overflow-x-auto">
+      {/* ============================================================ */}
+      {/* CATEGORY FILTER */}
+      {/* ============================================================ */}
+      <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-8 border-b border-[#e8e4df] sticky top-0 z-30 backdrop-blur-sm">
+        <div className="max-w-[1800px] mx-auto flex items-center overflow-x-auto">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -585,10 +620,11 @@ const BlogsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── MAIN GRID + SIDEBAR ────────────────────── */}
-      <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-16 lg:gap-20">
-
+      {/* ============================================================ */}
+      {/* MAIN GRID + SIDEBAR */}
+      {/* ============================================================ */}
+      <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-16 lg:py-24">
+        <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-16 lg:gap-20">
           {/* Left: Grid */}
           <div ref={gridRef.ref as React.RefObject<HTMLDivElement>}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-14">
@@ -711,9 +747,11 @@ const BlogsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── CLOSING CTA ────────────────────────────── */}
-      <div className="bg-[#e8e4df] px-6 sm:px-10 lg:px-20 py-20 lg:py-28">
-        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+      {/* ============================================================ */}
+      {/* CLOSING CTA */}
+      {/* ============================================================ */}
+      <div className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-20 lg:py-28">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
           <div>
             <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#5e17eb] block mb-4">
               Ready to Go?
@@ -764,8 +802,11 @@ const BlogsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 };
 
-export default BlogsPage;
+export default BlogPage;
