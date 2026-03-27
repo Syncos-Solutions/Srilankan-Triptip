@@ -1,11 +1,13 @@
+// app/blog/[slug]/page.tsx
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 
-// ─────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
 interface RelatedPost {
   slug: string;
   category: string;
@@ -15,9 +17,9 @@ interface RelatedPost {
   date: string;
 }
 
-// ─────────────────────────────────────────────
-// Intersection Observer Hook
-// ─────────────────────────────────────────────
+// ============================================================================
+// CUSTOM HOOK - Intersection Observer
+// ============================================================================
 const useInView = (threshold = 0.1) => {
   const [inView, setInView] = useState(false);
   const [fired, setFired] = useState(false);
@@ -42,9 +44,9 @@ const useInView = (threshold = 0.1) => {
   return { ref, inView };
 };
 
-// ─────────────────────────────────────────────
-// Reading Progress Bar
-// ─────────────────────────────────────────────
+// ============================================================================
+// READING PROGRESS BAR COMPONENT
+// ============================================================================
 const ReadingProgressBar: React.FC = () => {
   const [progress, setProgress] = useState(0);
 
@@ -73,9 +75,9 @@ const ReadingProgressBar: React.FC = () => {
   );
 };
 
-// ─────────────────────────────────────────────
-// Floating Share / TOC Sidebar
-// ─────────────────────────────────────────────
+// ============================================================================
+// FLOATING SIDEBAR COMPONENT
+// ============================================================================
 const FloatingSidebar: React.FC<{ readTime: string }> = ({ readTime }) => {
   const [scrolled, setScrolled] = useState(false);
 
@@ -158,9 +160,9 @@ const FloatingSidebar: React.FC<{ readTime: string }> = ({ readTime }) => {
   );
 };
 
-// ─────────────────────────────────────────────
-// Pull Quote Component
-// ─────────────────────────────────────────────
+// ============================================================================
+// PULL QUOTE COMPONENT
+// ============================================================================
 const PullQuote: React.FC<{ text: string }> = ({ text }) => {
   const { ref, inView } = useInView(0.2);
 
@@ -182,9 +184,9 @@ const PullQuote: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
-// ─────────────────────────────────────────────
-// Inline Image Component
-// ─────────────────────────────────────────────
+// ============================================================================
+// INLINE IMAGE COMPONENT
+// ============================================================================
 const InlineImage: React.FC<{ src: string; alt: string; caption?: string }> = ({
   src,
   alt,
@@ -215,9 +217,9 @@ const InlineImage: React.FC<{ src: string; alt: string; caption?: string }> = ({
   );
 };
 
-// ─────────────────────────────────────────────
-// Related Post Card
-// ─────────────────────────────────────────────
+// ============================================================================
+// RELATED POST CARD COMPONENT
+// ============================================================================
 const RelatedCard: React.FC<{ post: RelatedPost; delay: number; inView: boolean }> = ({
   post,
   delay,
@@ -264,9 +266,9 @@ const RelatedCard: React.FC<{ post: RelatedPost; delay: number; inView: boolean 
   );
 };
 
-// ─────────────────────────────────────────────
-// Related Posts data
-// ─────────────────────────────────────────────
+// ============================================================================
+// RELATED POSTS DATA
+// ============================================================================
 const relatedPosts: RelatedPost[] = [
   {
     slug: 'ella-train-truth',
@@ -294,10 +296,14 @@ const relatedPosts: RelatedPost[] = [
   },
 ];
 
-// ─────────────────────────────────────────────
-// Main Blog View Page
-// ─────────────────────────────────────────────
+// ============================================================================
+// MAIN BLOG VIEW PAGE COMPONENT
+// ============================================================================
 const BlogViewPage: React.FC = () => {
+  // State Management
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  // Intersection Observer Hooks
   const heroRef = useInView(0.1);
   const contentRef = useInView(0.05);
   const relatedRef = useInView(0.1);
@@ -308,19 +314,37 @@ const BlogViewPage: React.FC = () => {
     title: 'The Secret Hour at Sigiriya Nobody Tells You About',
     subtitle:
       'Before the crowds arrive, before the tour buses roll in — there is a 40-minute window at dawn where Sigiriya belongs entirely to you.',
-    heroImage:
-      '../blogimg/sigiriya.avif',
+    heroImage: '../blogimg/sigiriya.avif',
     author: 'Rohan Perera',
     authorRole: 'Lead Cultural Guide, Sri Lankan TripTip',
     authorBio:
-      'Rohan has guided over 800 guests through Sri Lanka\'s cultural heartland over 11 years. Born in Dambulla, he grew up in the shadow of Sigiriya.',
+      "Rohan has guided over 800 guests through Sri Lanka's cultural heartland over 11 years. Born in Dambulla, he grew up in the shadow of Sigiriya.",
     date: 'March 18, 2025',
     readTime: '5 min read',
     tags: ['Sigiriya', 'Sunrise', 'Ancient Sri Lanka', 'Photography'],
   };
 
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   return (
     <>
+    <Navbar
+            isIntro={false}
+            isMenuOpen={isMenuOpen}
+            onMenuOpen={() => setIsMenuOpen(true)}
+            onMenuClose={() => setIsMenuOpen(false)}
+          />
       {/* Reading progress */}
       <ReadingProgressBar />
 
@@ -332,16 +356,19 @@ const BlogViewPage: React.FC = () => {
         style={{ fontFamily: "'DM Sans', 'Syne', sans-serif" }}
         aria-label={post.title}
       >
-        {/* ── HERO ─────────────────────────────── */}
+        {/* ============================================================ */}
+        {/* HERO */}
+        {/* ============================================================ */}
         <div
           ref={heroRef.ref as React.RefObject<HTMLDivElement>}
           className="relative overflow-hidden"
           style={{ height: 'clamp(480px, 65vh, 780px)' }}
         >
+          
           <img
             src={post.heroImage}
             alt={post.title}
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-[2500ms] ease-out ${
+            className={`absolute inset-0 w-full h-full  object-cover transition-all duration-[2500ms] ease-out ${
               heroRef.inView ? 'scale-100' : 'scale-105'
             }`}
           />
@@ -362,7 +389,7 @@ const BlogViewPage: React.FC = () => {
           />
 
           {/* Top nav breadcrumb */}
-          <div className="absolute top-8 left-8 right-8 flex items-center gap-2 z-10">
+          <div className="absolute top-8 left-8 lg:mt-[80px] right-8 flex items-center gap-2 z-10">
             <Link
               href="/blog"
               className="text-white/60 text-xs tracking-widest uppercase hover:text-white transition-colors"
@@ -420,7 +447,9 @@ const BlogViewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── AUTHOR BAR ───────────────────────── */}
+        {/* ============================================================ */}
+        {/* AUTHOR BAR */}
+        {/* ============================================================ */}
         <div className="bg-[#f4f4f4] px-6 sm:px-12 lg:px-20 xl:px-28 py-6 border-b border-[#e8e4df]">
           <div className="max-w-[780px] mx-auto flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
@@ -458,7 +487,9 @@ const BlogViewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── ARTICLE CONTENT ──────────────────── */}
+        {/* ============================================================ */}
+        {/* ARTICLE CONTENT */}
+        {/* ============================================================ */}
         <div
           ref={contentRef.ref as React.RefObject<HTMLDivElement>}
           className={`px-6 sm:px-12 lg:px-20 xl:px-28 pt-14 lg:pt-20 pb-0 max-w-[1200px] mx-auto transition-all duration-700 ${
@@ -466,7 +497,7 @@ const BlogViewPage: React.FC = () => {
           }`}
         >
           <div className="max-w-[780px] mx-auto">
-            {/* Opening paragraph — larger, draws reader in */}
+            {/* Opening paragraph */}
             <p
               className="text-xl sm:text-2xl text-gray-900 leading-relaxed font-light mb-8"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
@@ -477,21 +508,20 @@ const BlogViewPage: React.FC = () => {
             </p>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              Set your alarm for 5:15am instead. You will need to negotiate entry with the
-              site manager — and yes, this takes a local contact or a trusted guide. But if
-              you can arrange it, you will walk into one of the ancient world&apos;s great
-              monuments while it still belongs to the birds and the mist.
+              Set your alarm for 5:15am instead. You will need to negotiate entry with the site
+              manager — and yes, this takes a local contact or a trusted guide. But if you can
+              arrange it, you will walk into one of the ancient world&apos;s great monuments while
+              it still belongs to the birds and the mist.
             </p>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              Sigiriya at dawn is a different geological and psychological event. The Lion
-              Rock, which rises 200 metres from the flat jungle, turns from charcoal to amber
-              to a burning rust-red as the sun crests the eastern hills. The frescoes in the
-              mirror wall gallery, which date from the 5th century, catch the low morning
-              light in a way that makes the painted eyes seem to follow you. Historians have
-              argued for decades whether this was an intentional architectural trick or
-              coincidence. Standing there at 6am with no one else around, the question
-              feels irrelevant.
+              Sigiriya at dawn is a different geological and psychological event. The Lion Rock,
+              which rises 200 metres from the flat jungle, turns from charcoal to amber to a
+              burning rust-red as the sun crests the eastern hills. The frescoes in the mirror wall
+              gallery, which date from the 5th century, catch the low morning light in a way that
+              makes the painted eyes seem to follow you. Historians have argued for decades whether
+              this was an intentional architectural trick or coincidence. Standing there at 6am with
+              no one else around, the question feels irrelevant.
             </p>
 
             {/* Pull quote */}
@@ -505,21 +535,19 @@ const BlogViewPage: React.FC = () => {
             </h2>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              The standard public gates open at 7am. Pre-dawn access exists but is
-              not officially advertised — it operates through the site&apos;s conservation
-              office and requires advance booking. Do not arrive and expect to negotiate
-              on the spot; you will be turned away. This is precisely the kind of access
-              our guides can facilitate, because they have spent years building trust
-              with the site managers.
+              The standard public gates open at 7am. Pre-dawn access exists but is not officially
+              advertised — it operates through the site&apos;s conservation office and requires
+              advance booking. Do not arrive and expect to negotiate on the spot; you will be turned
+              away. This is precisely the kind of access our guides can facilitate, because they
+              have spent years building trust with the site managers.
             </p>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              You will also need a torch (not just your phone). The stone steps at the
-              base are uneven and the lower sections of the climb have no artificial
-              lighting. Bring water, a light layer — the early morning at altitude is
-              cooler than you expect — and crucially, leave the drone at the hotel.
-              No drone access is permitted before standard hours, and attempting to
-              fly one will end your pre-dawn privilege permanently.
+              You will also need a torch (not just your phone). The stone steps at the base are
+              uneven and the lower sections of the climb have no artificial lighting. Bring water, a
+              light layer — the early morning at altitude is cooler than you expect — and crucially,
+              leave the drone at the hotel. No drone access is permitted before standard hours, and
+              attempting to fly one will end your pre-dawn privilege permanently.
             </p>
 
             {/* Inline image */}
@@ -537,19 +565,18 @@ const BlogViewPage: React.FC = () => {
             </h2>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              Expect roughly 40 minutes of genuine solitude before the first standard
-              visitors begin their ascent. This window — from approximately 6:10am to
-              6:50am on most mornings — is when the experience is closest to what the
-              site&apos;s original architect, King Kashyapa, intended it to feel like: vast,
-              silent, and faintly terrifying. The jungle below you is still waking up.
-              The mist in the valley has not yet burned off. The city of Dambulla, visible
-              on a clear day, is a grey smudge on the horizon.
+              Expect roughly 40 minutes of genuine solitude before the first standard visitors begin
+              their ascent. This window — from approximately 6:10am to 6:50am on most mornings — is
+              when the experience is closest to what the site&apos;s original architect, King
+              Kashyapa, intended it to feel like: vast, silent, and faintly terrifying. The jungle
+              below you is still waking up. The mist in the valley has not yet burned off. The city
+              of Dambulla, visible on a clear day, is a grey smudge on the horizon.
             </p>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              Bring a journal or just sit. After years of guiding, I still do not have
-              the right words for what it feels like to be alone on that summit at dawn.
-              Every guest I have brought here has gone quiet. Every single one.
+              Bring a journal or just sit. After years of guiding, I still do not have the right
+              words for what it feels like to be alone on that summit at dawn. Every guest I have
+              brought here has gone quiet. Every single one.
             </p>
 
             {/* Second pull quote */}
@@ -563,18 +590,17 @@ const BlogViewPage: React.FC = () => {
             </h2>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-7">
-              This is not the trip for everyone. The climb at dawn requires reasonable
-              fitness — the final approach involves a near-vertical iron staircase bolted
-              to the rock face, and without crowds in front of you, the exposure feels
-              considerably more dramatic. Guests with serious vertigo should know this
-              before committing.
+              This is not the trip for everyone. The climb at dawn requires reasonable fitness — the
+              final approach involves a near-vertical iron staircase bolted to the rock face, and
+              without crowds in front of you, the exposure feels considerably more dramatic. Guests
+              with serious vertigo should know this before committing.
             </p>
 
             <p className="text-base sm:text-lg text-gray-600 leading-[1.85] font-light mb-14">
-              For everyone else: this is the version of Sri Lanka that we exist to show
-              you. Not the postcard. The real thing, at the only hour it reveals itself
-              without reservation. Book it before your first coffee on the first morning
-              you arrive in the island. You will thank yourself for the rest of the trip.
+              For everyone else: this is the version of Sri Lanka that we exist to show you. Not the
+              postcard. The real thing, at the only hour it reveals itself without reservation. Book
+              it before your first coffee on the first morning you arrive in the island. You will
+              thank yourself for the rest of the trip.
             </p>
 
             {/* Tags */}
@@ -591,7 +617,9 @@ const BlogViewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── AUTHOR BIO ───────────────────────── */}
+        {/* ============================================================ */}
+        {/* AUTHOR BIO */}
+        {/* ============================================================ */}
         <div className="bg-[#f4f4f4] px-6 sm:px-12 lg:px-20 xl:px-28 py-16">
           <div className="max-w-[780px] mx-auto">
             <div className="flex flex-col sm:flex-row items-start gap-6">
@@ -623,7 +651,9 @@ const BlogViewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── CTA BAND ─────────────────────────── */}
+        {/* ============================================================ */}
+        {/* CTA BAND */}
+        {/* ============================================================ */}
         <div
           className="px-6 sm:px-12 lg:px-20 py-16 lg:py-20"
           style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
@@ -640,8 +670,8 @@ const BlogViewPage: React.FC = () => {
                 For Yourself?
               </h3>
               <p className="text-white/70 font-light text-sm mt-3 max-w-sm leading-relaxed">
-                Our guides have the access, the knowledge and the contacts to make mornings
-                like this happen for you.
+                Our guides have the access, the knowledge and the contacts to make mornings like
+                this happen for you.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
@@ -670,7 +700,9 @@ const BlogViewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── RELATED POSTS ────────────────────── */}
+        {/* ============================================================ */}
+        {/* RELATED POSTS */}
+        {/* ============================================================ */}
         <div
           ref={relatedRef.ref as React.RefObject<HTMLDivElement>}
           className="bg-[#ffffff] px-6 sm:px-12 lg:px-20 py-20 lg:py-28"
@@ -709,7 +741,7 @@ const BlogViewPage: React.FC = () => {
               }`}
             >
               <Link
-                href="/blogs"
+                href="/blog"
                 className="group inline-flex items-center gap-3 text-sm font-bold tracking-[0.2em] uppercase text-gray-400 transition-all duration-300 hover:text-[#5e17eb] hover:gap-5"
               >
                 <svg
