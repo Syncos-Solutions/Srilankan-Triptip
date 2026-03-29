@@ -1,4 +1,3 @@
-// app/taxi/page.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,553 +5,214 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-// ============================================================================
-// INTERSECTION OBSERVER HOOK
-// ============================================================================
-const useInView = (threshold = 0.1) => {
+// ─────────────────────────────────────────────
+// Intersection Observer Hook
+// ─────────────────────────────────────────────
+const useInView = (threshold = 0.08) => {
   const [inView, setInView] = useState(false);
   const [fired, setFired] = useState(false);
   const ref = useRef<HTMLElement>(null);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !fired) {
-          setInView(true);
-          setFired(true);
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting && !fired) { setInView(true); setFired(true); } },
       { threshold }
     );
     if (ref.current) observer.observe(ref.current);
     return () => { if (ref.current) observer.unobserve(ref.current); };
   }, [fired, threshold]);
-
   return { ref, inView };
 };
 
-// ============================================================================
-// ANIMATED COUNTER
-// ============================================================================
-const Counter: React.FC<{ target: number; suffix?: string; inView: boolean }> = ({
-  target, suffix = '', inView,
-}) => {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = Math.ceil(target / (1800 / 16));
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) { setCount(target); clearInterval(timer); }
-      else setCount(start);
-    }, 16);
-    return () => clearInterval(timer);
-  }, [inView, target]);
-  return <>{count.toLocaleString()}{suffix}</>;
-};
+// ─────────────────────────────────────────────
+// Form Field
+// ─────────────────────────────────────────────
+const FormField: React.FC<{
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ label, required, children, className = '' }) => (
+  <div className={`relative group ${className}`}>
+    <label className="block text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-2 transition-colors duration-300 group-focus-within:text-[#5e17eb]">
+      {label}{required && <span className="text-[#5e17eb] ml-0.5">*</span>}
+    </label>
+    {children}
+    <div className="absolute bottom-0 left-0 w-0 h-[2px] transition-all duration-500 ease-out group-focus-within:w-full"
+      style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
+  </div>
+);
 
-// ============================================================================
-// DATA
-// ============================================================================
-const fleetCategories = [
+const InputBase = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light placeholder-gray-300 focus:outline-none focus:border-transparent transition-all";
+const SelectBase = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light focus:outline-none focus:border-transparent transition-all appearance-none cursor-pointer";
+
+// ─────────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────────
+const vehicleFleet = [
   {
-    id: 'standard',
-    tier: 'Standard',
-    name: 'City Comfort',
-    tagline: 'Effortless urban movement',
-    desc: 'Immaculately maintained sedans for airport transfers, city commutes, and short-haul island routes. Air-conditioned, punctual, and piloted by courteous professionals.',
-    features: ['Up to 3 passengers', 'Airport pick-up board', '2 luggage pieces', 'Wi-Fi on request'],
-    priceFrom: 'From USD 35',
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=90',
-    accent: '#5e17eb',
+    id: 'v1',
+    name: 'Executive Sedan',
+    model: 'Toyota Camry / Honda Accord',
+    capacity: '1–3 Passengers',
+    luggage: 'Up to 2 Large Bags',
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=900&q=85',
+    features: ['Leather seating', 'Climate control', 'USB charging', 'Bottled water'],
+    badge: 'Most Booked',
+    priceFrom: 'From $45',
   },
   {
-    id: 'premium',
-    tier: 'Premium',
-    name: 'Executive Ride',
-    tagline: 'Elevated at every mile',
-    desc: 'Premium SUVs and luxury sedans for discerning travelers who expect more than just a ride. Chilled water, curated playlists, and a chauffeur who anticipates your needs.',
-    features: ['Up to 4 passengers', 'Meet & greet service', '4 luggage pieces', 'Chilled water & snacks'],
-    priceFrom: 'From USD 65',
-    image: 'https://images.unsplash.com/photo-1606611013016-969c19ba27bb?w=1200&q=90',
-    accent: '#1800ad',
-    featured: true,
+    id: 'v2',
+    name: 'Premium SUV',
+    model: 'Toyota Fortuner / Mitsubishi Montero',
+    capacity: '1–6 Passengers',
+    luggage: 'Up to 4 Large Bags',
+    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=900&q=85',
+    features: ['High ground clearance', 'Extra luggage space', 'Wi-Fi on request', 'Child seats'],
+    badge: 'Family Choice',
+    priceFrom: 'From $65',
   },
   {
-    id: 'luxury',
-    tier: 'Luxury',
-    name: 'Prestige Class',
-    tagline: 'Where journey becomes occasion',
-    desc: 'Our finest fleet — premium MPVs and luxury seven-seaters for groups, honeymoon transfers, and travelers for whom the ride itself is part of the experience.',
-    features: ['Up to 7 passengers', 'Private chauffeur', '6 luggage pieces', 'Red carpet service'],
-    priceFrom: 'From USD 110',
-    image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&q=90',
-    accent: '#5e17eb',
+    id: 'v3',
+    name: 'Luxury Van',
+    model: 'Toyota HiAce / KIA Carnival',
+    capacity: '6–12 Passengers',
+    luggage: 'Up to 8 Large Bags',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=900&q=85',
+    features: ['Reclining seats', 'Panoramic windows', 'Entertainment system', 'Refrigerator on board'],
+    badge: 'Group Special',
+    priceFrom: 'From $90',
   },
 ];
 
-const routes = [
-  { from: 'Colombo Airport', to: 'City Centre', duration: '45 min', distance: '35 km' },
-  { from: 'Colombo', to: 'Kandy', duration: '2.5 hrs', distance: '115 km' },
-  { from: 'Colombo', to: 'Galle', duration: '2 hrs', distance: '119 km' },
-  { from: 'Colombo', to: 'Ella', duration: '6 hrs', distance: '230 km' },
-  { from: 'Kandy', to: 'Sigiriya', duration: '1.5 hrs', distance: '68 km' },
-  { from: 'Negombo', to: 'Colombo Airport', duration: '30 min', distance: '8 km' },
+const vehicleConditions = [
+  {
+    id: 'c1',
+    category: 'Tyre Quality',
+    headline: 'Road-Ready. Always.',
+    body: 'Every vehicle in our fleet undergoes tyre inspection before each journey. We use premium-grade all-season tyres — checked for tread depth, inflation pressure and sidewall integrity. No exceptions.',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="square" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+        <path strokeLinecap="square" d="M12 16a4 4 0 100-8 4 4 0 000 8z" />
+        <path strokeLinecap="square" d="M12 6v2M12 16v2M6 12H4M20 12h-2" />
+      </svg>
+    ),
+    stats: [
+      { label: 'Tread Depth Check', value: 'Every Trip' },
+      { label: 'Tyre Brand', value: 'Michelin / Bridgestone' },
+      { label: 'Pressure Test', value: 'Pre-Departure' },
+    ],
+  },
+  {
+    id: 'c2',
+    category: 'Service Record',
+    headline: 'Maintained Like New.',
+    body: 'We follow a strict 5,000 km service schedule for all vehicles — engine oil, filters, brake pads, coolant and full diagnostic checks. Every service is logged and available on request. You ride in a vehicle that is maintained, not just cleaned.',
+    image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=900&q=85',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="square" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="square" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    stats: [
+      { label: 'Service Interval', value: 'Every 5,000 km' },
+      { label: 'Brake Check', value: 'Bi-Monthly' },
+      { label: 'Full Diagnostic', value: 'Quarterly' },
+    ],
+  },
+  {
+    id: 'c3',
+    category: 'Interior Quality',
+    headline: 'Clean. Calm. Comfortable.',
+    body: 'Every vehicle is deep-cleaned and sanitised before each booking. Leather or premium fabric seats, odour-free interiors, charged USB ports, chilled bottled water and a curated playlist — because the journey should feel as good as the destination.',
+    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&q=85',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="square" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    ),
+    stats: [
+      { label: 'Deep Clean', value: 'Before Each Trip' },
+      { label: 'Air Quality', value: 'HEPA Filtered' },
+      { label: 'Sanitised', value: 'Hospital Grade' },
+    ],
+  },
 ];
 
-const pillars = [
+const serviceTypes = [
   {
-    num: '01',
-    title: 'Guaranteed Punctuality',
-    body: 'We track flights in real time and adjust pickup times automatically. Your driver is there before you are — every time, without exception.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="square" strokeLinejoin="miter" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-      </svg>
-    ),
+    icon: '✈',
+    title: 'Airport Transfers',
+    body: 'Punctual, professional pickup and drop-off. Flight tracking included — we wait if your plane is delayed.',
+    badge: '24/7 Service',
   },
   {
-    num: '02',
-    title: 'Vetted Chauffeurs',
-    body: 'Every driver is personally vetted, licensed and trained in hospitality. They speak English, know the island deeply, and treat your journey as their responsibility.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="square" strokeLinejoin="miter" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
+    icon: '🏙',
+    title: 'City Transfers',
+    body: 'Colombo, Kandy, Galle, Negombo — any city, any time. Our drivers know every route and every shortcut.',
+    badge: null,
   },
   {
-    num: '03',
-    title: 'Fixed Transparent Fares',
-    body: 'No meters. No surprises. No surge pricing at 2am. You know the cost before you confirm — and it never changes.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="square" strokeLinejoin="miter" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-      </svg>
-    ),
+    icon: '🗺',
+    title: 'Scenic Drives',
+    body: 'Let your driver become your local guide. Request stops, detours and hidden viewpoints along the way.',
+    badge: 'Popular',
   },
   {
-    num: '04',
-    title: '24/7 Concierge Line',
-    body: 'A real person answers at 3am. Not a chatbot, not a queue. Our operations team is always live and always able to solve any situation instantly.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="square" strokeLinejoin="miter" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>
-    ),
+    icon: '🌙',
+    title: 'Night Transfers',
+    body: 'Safe, reliable travel after dark. Fully lit, fully tracked, fully trustworthy — no matter what time you land.',
+    badge: null,
+  },
+  {
+    icon: '📅',
+    title: 'Full-Day Hire',
+    body: 'Book your driver for the entire day. Explore at your own pace — they wait, they advise, they take you further.',
+    badge: null,
+  },
+  {
+    icon: '👰',
+    title: 'Special Occasions',
+    body: 'Weddings, anniversaries, VIP events. Decorated vehicles, suited drivers and white-glove service throughout.',
+    badge: 'Premium',
   },
 ];
 
-// ============================================================================
-// BOOKING FORM COMPONENT
-// ============================================================================
-const BookingForm: React.FC = () => {
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+const trustPillars = [
+  { value: '24/7', label: 'Always Available', sub: 'Round the clock, every day of the year' },
+  { value: '100%', label: 'Verified Drivers', sub: 'Licensed, background-checked, trained' },
+  { value: '4.9★', label: 'Average Rating', sub: 'Across 2,400+ completed rides' },
+  { value: '0', label: 'Hidden Charges', sub: 'Price agreed upfront, always honoured' },
+];
+
+// ─────────────────────────────────────────────
+// Main Taxi Page
+// ─────────────────────────────────────────────
+const TaxiPage: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [activeVehicle, setActiveVehicle] = useState(0);
+
+  const heroRef = useInView(0.1);
+  const trustRef = useInView(0.1);
+  const serviceRef = useInView(0.08);
+  const fleetRef = useInView(0.08);
+  const conditionsRef = useInView(0.08);
+  const formRef = useInView(0.06);
+  const ctaRef = useInView(0.1);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('submitting');
-    setTimeout(() => setStatus('success'), 1600);
+    setFormStatus('submitting');
+    setTimeout(() => setFormStatus('success'), 2000);
   };
 
-  if (status === 'success') {
-    return (
-      <div className="min-h-[420px] flex flex-col items-center justify-center text-center py-16">
-        <div
-          className="w-16 h-16 flex items-center justify-center mb-6"
-          style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
-        >
-          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h4
-          className="text-2xl font-black text-gray-900 tracking-tight mb-2"
-          style={{ fontFamily: "'Syne', sans-serif" }}
-        >
-          Booking Request Received
-        </h4>
-        <p className="text-gray-500 font-light text-sm max-w-xs leading-relaxed">
-          Our team will confirm your ride within 2 hours with driver details and final pricing.
-        </p>
-        <button
-          onClick={() => setStatus('idle')}
-          className="mt-8 text-xs font-bold tracking-widest uppercase text-[#5e17eb] hover:text-[#1800ad] transition-colors"
-        >
-          Book Another Ride
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-
-      {/* Row 1: Salutation + Name */}
-      <div className="grid grid-cols-[120px_1fr] gap-6">
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Salutation
-          </label>
-          <select
-            required
-            defaultValue=""
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all font-light appearance-none cursor-pointer text-sm"
-          >
-            <option value="" disabled>—</option>
-            <option>Mr.</option>
-            <option>Mrs.</option>
-            <option>Ms.</option>
-            <option>Dr.</option>
-            <option>Prof.</option>
-          </select>
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Full Name
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="Your full name"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all placeholder-gray-300 font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-      </div>
-
-      {/* Row 2: Email + Phone */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Email Address
-          </label>
-          <input
-            type="email"
-            required
-            placeholder="your@email.com"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all placeholder-gray-300 font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Phone / WhatsApp
-          </label>
-          <input
-            type="tel"
-            required
-            placeholder="+1 000 000 0000"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all placeholder-gray-300 font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-      </div>
-
-      {/* Row 3: Preferred Contact Method */}
-      <div className="relative group">
-        <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-3 transition-colors group-focus-within:text-[#5e17eb]">
-          Preferred Contact Method
-        </label>
-        <div className="flex gap-0 border border-gray-200">
-          {['Email', 'WhatsApp', 'Other'].map((method) => {
-            const id = `contact-${method.toLowerCase()}`;
-            return (
-              <label
-                key={method}
-                htmlFor={id}
-                className="flex-1 relative cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  id={id}
-                  name="contactMethod"
-                  value={method.toLowerCase()}
-                  className="peer sr-only"
-                  defaultChecked={method === 'Email'}
-                />
-                <span className="block text-center py-2.5 text-xs font-bold tracking-[0.2em] uppercase text-gray-400 border-r border-gray-200 last:border-r-0 transition-all duration-300 peer-checked:text-white peer-checked:bg-gradient-to-r peer-checked:from-[#5e17eb] peer-checked:to-[#1800ad]">
-                  {method}
-                </span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Row 4: Pickup + Destination */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Pickup Location
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="Address or landmark"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all placeholder-gray-300 font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Drop-off / Destination
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="Address or landmark"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all placeholder-gray-300 font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-      </div>
-
-      {/* Row 5: Date + Time */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Pickup Date
-          </label>
-          <input
-            type="date"
-            required
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Pickup Time
-          </label>
-          <input
-            type="time"
-            required
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all font-light text-sm"
-          />
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-      </div>
-
-      {/* Row 6: Adults + Children + Luggage */}
-      <div className="grid grid-cols-3 gap-6">
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Adults
-          </label>
-          <select
-            required
-            defaultValue="1"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all font-light appearance-none cursor-pointer text-sm"
-          >
-            {[1,2,3,4,5,6,7].map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Children
-          </label>
-          <select
-            defaultValue="0"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all font-light appearance-none cursor-pointer text-sm"
-          >
-            {[0,1,2,3,4].map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-        <div className="relative group">
-          <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-            Luggage
-          </label>
-          <select
-            defaultValue="1"
-            className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all font-light appearance-none cursor-pointer text-sm"
-          >
-            <option value="0">None</option>
-            <option value="1">1 bag</option>
-            <option value="2">2 bags</option>
-            <option value="3">3 bags</option>
-            <option value="4+">4+ bags</option>
-          </select>
-          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-        </div>
-      </div>
-
-      {/* Row 7: Additional Notes */}
-      <div className="relative group">
-        <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2 transition-colors group-focus-within:text-[#5e17eb]">
-          Additional Notes
-        </label>
-        <textarea
-          rows={3}
-          placeholder="Flight number, special requirements, preferred vehicle class, or anything else..."
-          className="w-full bg-transparent border-b border-gray-300 py-2 text-gray-900 focus:outline-none transition-all placeholder-gray-300 font-light resize-none text-sm"
-        />
-        <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-[#5e17eb] to-[#1800ad] transition-all duration-500 group-focus-within:w-full" />
-      </div>
-
-      {/* Submit */}
-      <div className="pt-4">
-        <button
-          type="submit"
-          disabled={status === 'submitting'}
-          className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-5 text-sm font-bold tracking-widest uppercase text-white transition-all duration-300 overflow-hidden disabled:opacity-70"
-        >
-          <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105" style={{ background: 'linear-gradient(135deg, #5e17eb 0%, #1800ad 100%)' }} />
-          <span className="relative z-10 flex items-center gap-3">
-            {status === 'submitting' ? 'Processing...' : 'Reserve My Ride'}
-            {status !== 'submitting' && (
-              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            )}
-          </span>
-        </button>
-        <p className="text-center text-[10px] text-gray-400 mt-4 tracking-wide">
-          Confirmation within 2 hours · No payment required to reserve
-        </p>
-      </div>
-    </form>
-  );
-};
-
-// ============================================================================
-// FLEET CARD COMPONENT
-// ============================================================================
-const FleetCard: React.FC<{ car: typeof fleetCategories[0]; index: number; inView: boolean }> = ({ car, index, inView }) => {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className="relative overflow-hidden group"
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? 'translateY(0)' : 'translateY(40px)',
-        transition: `opacity 0.8s ease ${index * 150}ms, transform 0.8s ease ${index * 150}ms`,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {car.featured && (
-        <div
-          className="absolute top-5 right-5 z-20 px-3 py-1"
-          style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
-        >
-          <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white">Most Popular</span>
-        </div>
-      )}
-
-      {/* Image */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: '16/10' }}>
-        <img
-          src={car.image}
-          alt={car.name}
-          className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out"
-          style={{ transform: hovered ? 'scale(1.05)' : 'scale(1)' }}
-        />
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%)',
-            opacity: hovered ? 1 : 0.6,
-          }}
-        />
-        {/* Tier badge on image */}
-        <div className="absolute bottom-5 left-6">
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/60">
-            {car.tier}
-          </span>
-          <p
-            className="text-2xl font-black text-white leading-tight tracking-tight"
-            style={{ fontFamily: "'Syne', sans-serif" }}
-          >
-            {car.name}
-          </p>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div
-        className="p-8 border-b border-l border-r border-[#e8e4df] transition-all duration-300"
-        style={{ borderColor: hovered ? `${car.accent}33` : '#e8e4df' }}
-      >
-        {/* Animated top line */}
-        <div
-          className="h-[2px] mb-6 -mt-[1px] transition-all duration-500"
-          style={{
-            background: `linear-gradient(to right, ${car.accent}, #1800ad)`,
-            width: hovered ? '100%' : '40px',
-          }}
-        />
-
-        <p className="text-gray-500 text-sm leading-relaxed font-light mb-6">{car.desc}</p>
-
-        {/* Features */}
-        <div className="grid grid-cols-2 gap-2 mb-8">
-          {car.features.map((feat) => (
-            <div key={feat} className="flex items-center gap-2">
-              <div
-                className="w-1 h-1 flex-shrink-0"
-                style={{ background: car.accent }}
-              />
-              <span className="text-xs text-gray-600 font-light">{feat}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Price</span>
-            <p
-              className="text-lg font-black text-gray-900 tracking-tight"
-              style={{ fontFamily: "'Syne', sans-serif", color: car.accent }}
-            >
-              {car.priceFrom}
-            </p>
-          </div>
-          <a
-            href="#booking"
-            className="group/btn inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 hover:gap-3"
-            style={{ color: car.accent }}
-          >
-            Book Now
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================================================
-// MAIN TAXI PAGE
-// ============================================================================
-const TaxiPage: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const heroRef = useInView(0.1);
-  const statsRef = useInView(0.1);
-  const pillarsRef = useInView(0.08);
-  const fleetRef = useInView(0.08);
-  const routesRef = useInView(0.1);
-  const bookingRef = useInView(0.05);
-  const closingRef = useInView(0.1);
-
-  useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isMenuOpen]);
-
-  return (
-    <main
-      className="bg-[#f4f4f4] overflow-hidden"
-      style={{ fontFamily: "'DM Sans', 'Syne', sans-serif" }}
-    >
+    <>
       <Navbar
         isIntro={false}
         isMenuOpen={isMenuOpen}
@@ -560,636 +220,798 @@ const TaxiPage: React.FC = () => {
         onMenuClose={() => setIsMenuOpen(false)}
       />
 
-      {/* ================================================================ */}
-      {/* HERO — Full-bleed, cinematic, editorial                           */}
-      {/* ================================================================ */}
-      <div
-        ref={heroRef.ref as React.RefObject<HTMLDivElement>}
-        className="relative bg-[#e8e4df] overflow-hidden"
-        style={{ minHeight: '100vh' }}
-      >
-        {/* Background image */}
-        <div className="absolute inset-0">
-          
-          {/* Multi-layer gradient */}
-          {/* <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(to right, rgba(5,5,7,0.95) 0%, rgba(5,5,7,0.6) 55%, rgba(5,5,7,0.2) 100%)',
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(to top, rgba(5,5,7,0.8) 0%, transparent 50%)',
-            }}
-          />
-         
-          <div
-            className="absolute inset-0 opacity-15"
-            style={{ background: 'linear-gradient(135deg, #5e17eb, transparent 60%)' }}
-          /> */}
-        </div>
+      <main className="bg-[#f4f4f4] overflow-hidden" style={{ fontFamily: "'DM Sans', 'Syne', sans-serif" }}>
 
-        {/* Dot grid texture overlay */}
+        {/* ── HERO BAND ─────────────────────── */}
         <div
-          aria-hidden="true"
-          className="absolute top-0 right-0 w-[50%] h-full opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #5e17eb 2px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-
-        {/* Content */}
-        <div className="relative z-10 max-w-[1800px]  px-6 sm:px-10 lg:px-12 pt-44 pb-20 lg:pt-52 lg:pb-28 flex flex-col justify-end min-h-screen">
-
-          {/* Top tag */}
-          <div
-            className={`flex items-center gap-3 mb-8 transition-all duration-700 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+          ref={heroRef.ref as React.RefObject<HTMLDivElement>}
+          className="relative bg-[#ffffff] px-6 sm:px-10 lg:px-20 pt-32 pb-0 overflow-hidden"
+        >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none select-none absolute -right-4 top-0 font-black leading-none tracking-tighter text-[#f4f4f4]"
+            style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(80px,13vw,180px)' }}
           >
-            <span className="w-2 h-2 rounded-full bg-[#5e17eb] animate-pulse" />
-            <span className="text-xs font-bold tracking-[0.35em] uppercase text-white/60"
-              style={{ fontFamily: "'DM Sans', sans-serif" }}>
-              Premium Taxi & Transfers
-            </span>
-            <div className="h-px w-10 bg-white/20" />
-            <span className="text-xs tracking-widest text-white/40 uppercase">Sri Lankan TripTip</span>
-          </div>
+            TRANSFER
+          </span>
 
-          {/* Main headline */}
-          <div className="max-w-4xl">
+          <div className="relative z-10 max-w-[1400px] mx-auto">
+            <div className={`flex items-center gap-3 mb-10 transition-all duration-700 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <span className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                Sri Lankan TripTip
+              </span>
+              <div className="h-px w-12 bg-[#5e17eb]" />
+              <span className="text-xs tracking-widest text-gray-400 uppercase">Premium Taxi & Transfers</span>
+            </div>
+
             <h1
-              className={`font-black leading-[0.92] tracking-tighter text-white mb-8 transition-all duration-700 delay-100 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-              style={{
-                fontFamily: "'Syne', sans-serif",
-                fontSize: 'clamp(52px, 8vw, 120px)',
-              }}
+              className={`font-black tracking-tighter text-gray-900 leading-[0.91] mb-6 transition-all duration-700 delay-100 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+              style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(44px,7.5vw,112px)' }}
             >
-              Every Mile,
+              Arrive in
               <br />
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Mastered.
+              <span style={{ background: 'linear-gradient(135deg, #5e17eb 0%, #1800ad 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Comfort. Always.
               </span>
             </h1>
 
-            <p
-              className={`text-white/65 font-light leading-relaxed max-w-xl mb-12 transition-all duration-700 delay-200 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-              style={{ fontSize: 'clamp(15px, 1.5vw, 19px)' }}
-            >
-              Airport transfers, intercity journeys, and island-wide chauffeur services.
-              Fixed pricing, vetted drivers, and a standard of comfort you will want to book every time.
-            </p>
-
-            <div
-              className={`flex flex-col sm:flex-row gap-4 transition-all duration-700 delay-300 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-            >
-              <a
-                href="#booking"
-                className="group inline-flex items-center gap-3 px-8 py-5 text-sm font-bold tracking-widest uppercase text-white transition-all duration-300 hover:gap-5"
-                style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
-              >
-                Book Your Ride
-                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </a>
-              <a
-                href="tel:+94771234567"
-                className="inline-flex items-center gap-3 px-8 py-5 text-sm font-bold tracking-widest uppercase text-white border border-white/20 transition-all duration-300 hover:border-white/50 hover:bg-white/5"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="square" strokeLinejoin="miter" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                Call 24/7
-              </a>
+            <div className={`grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-20 pb-20 transition-all duration-700 delay-200 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <p className="text-base sm:text-lg text-gray-500 leading-relaxed font-light max-w-lg">
+                From Bandaranaike to your beach villa. From Kandy to the hill-country tea estate.
+                Every transfer in a clean, maintained vehicle with a driver who knows this island
+                — and treats you like the guest of honour.
+              </p>
+              <div className="flex flex-col gap-5">
+                {trustPillars.slice(0, 3).map((p, i) => (
+                  <div key={i} className="flex items-center gap-5">
+                    <div
+                      className="text-xl font-black w-14 flex-shrink-0"
+                      style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                    >
+                      {p.value}
+                    </div>
+                    <div className="h-px flex-1 bg-[#e8e4df]" />
+                    <p className="text-xs text-gray-500 font-light text-right w-40 flex-shrink-0">{p.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+          <div className="w-full h-px bg-[#e8e4df]" />
+        </div>
 
-          {/* Bottom strip — quick stats */}
-          <div
-            className={`mt-20 pt-8 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-8 transition-all duration-700 delay-400 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-          >
-            {[
-              { val: '24/7', label: 'Available' },
-              { val: '50+', label: 'Vehicles' },
-              { val: '12+', label: 'Years' },
-              { val: '100%', label: 'Tracked' },
-            ].map((s) => (
-              <div key={s.label}>
+        {/* ── HERO CINEMATIC IMAGE ──────────── */}
+        <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-20">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="relative overflow-hidden" style={{ height: 'clamp(280px, 42vw, 560px)' }}>
+              <img
+                src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1800&q=90"
+                alt="Premium taxi transfer Sri Lanka"
+                className="w-full h-full object-cover"
+                style={{ objectPosition: 'center 40%' }}
+              />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.05) 100%)' }} />
+              <div className="absolute inset-0 opacity-15" style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }} />
+              <div className="absolute left-8 sm:left-14 top-1/2 -translate-y-1/2 max-w-sm">
+                <div className="h-px w-10 mb-6" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
+                <p className="font-black text-white leading-[1.05] tracking-tight" style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(18px, 2.5vw, 30px)' }}>
+                  "Not just a driver.
+                  <br />A host on wheels."
+                </p>
+                <p className="text-white/45 text-xs mt-4 tracking-widest uppercase">— Sri Lankan TripTip</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── TRUST METRICS STRIP ──────────── */}
+        <div
+          ref={trustRef.ref as React.RefObject<HTMLDivElement>}
+          className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-10 border-y border-[#e8e4df]"
+        >
+          <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#e8e4df]">
+            {trustPillars.map((p, i) => (
+              <div
+                key={p.label}
+                className={`px-6 lg:px-10 first:pl-0 last:pr-0 transition-all duration-700 ease-out ${trustRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: trustRef.inView ? `${i * 80}ms` : '0ms' }}
+              >
                 <div
-                  className="text-2xl sm:text-3xl font-black text-white leading-none mb-1"
-                  style={{ fontFamily: "'Syne', sans-serif" }}
+                  className="font-black leading-none tracking-tighter mb-2"
+                  style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(28px,3.5vw,48px)', background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
                 >
-                  {s.val}
+                  {p.value}
                 </div>
-                <div className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/40">{s.label}</div>
+                <div className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-1">{p.label}</div>
+                <div className="text-[11px] text-gray-400">{p.sub}</div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* ================================================================ */}
-      {/* TRUST METRICS STRIP                                              */}
-      {/* ================================================================ */}
-      <div
-        ref={statsRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-14"
-      >
-        <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#e8e4df]">
-          {[
-            { target: 14800, suffix: '+', label: 'Rides Completed', sub: 'Since 2012' },
-            { target: 98, suffix: '%', label: 'On-Time Rate', sub: 'Measured every trip' },
-            { target: 50, suffix: '+', label: 'Premium Vehicles', sub: 'All under 3 years old' },
-            { target: 47, suffix: '', label: 'Countries Served', sub: 'Guests from worldwide' },
-          ].map((m, i) => (
-            <div
-              key={m.label}
-              className={`px-6 lg:px-10 first:pl-0 last:pr-0 transition-all duration-700 ease-out ${statsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-              style={{ transitionDelay: `${i * 80}ms` }}
-            >
-              <div
-                className="text-[clamp(36px,4.5vw,64px)] font-black leading-none tracking-tighter mb-2"
-                style={{
-                  fontFamily: "'Syne', sans-serif",
-                  background: 'linear-gradient(135deg, #5e17eb 30%, #1800ad 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                <Counter target={m.target} suffix={m.suffix} inView={statsRef.inView} />
-              </div>
-              <div className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-1">{m.label}</div>
-              <div className="text-[11px] text-gray-400 leading-snug">{m.sub}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      
-      {/* ================================================================ */}
-      {/* BOOKING SECTION                                                  */}
-      {/* ================================================================ */}
-      <div
-        id="booking"
-        ref={bookingRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-24 lg:py-32 relative overflow-hidden"
-      >
-        {/* Watermark */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute right-0 top-10 font-black leading-none text-[#f4f4f4] tracking-tighter z-0"
-          style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(80px,13vw,160px)' }}
+         {/* ── BOOKING FORM ──────────────────── */}
+        <div
+          ref={formRef.ref as React.RefObject<HTMLDivElement>}
+          id="booking-form"
+          className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
         >
-          RESERVE
-        </span>
-
-        <div className="max-w-[1800px] mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-16 lg:gap-24">
-
-            {/* Left: Info */}
-            <div className={`transition-all duration-700 ${bookingRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-1 h-8 bg-[#5e17eb]" />
-                <span className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                  Book a Ride
-                </span>
+          <div className="max-w-[1400px] mx-auto">
+            {/* Header */}
+            <div className={`mb-16 transition-all duration-700 ${formRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-1 h-10 bg-[#5e17eb]" />
+                <div>
+                  <p className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                    Book Your Transfer
+                  </p>
+                  <p className="text-xs text-gray-400 tracking-widest uppercase mt-0.5">Instant confirmation</p>
+                </div>
               </div>
-
               <h2
-                className="text-[clamp(36px,4.5vw,64px)] font-black text-gray-900 tracking-tight leading-tight mb-8"
+                className="text-[clamp(32px,5vw,68px)] font-black tracking-tighter text-gray-900 leading-[0.93]"
                 style={{ fontFamily: "'Syne', sans-serif" }}
               >
                 Reserve Your
                 <br />
                 <span style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  Premium Transfer.
+                  Ride Today.
                 </span>
               </h2>
+            </div>
 
-              <p className="text-gray-500 font-light leading-relaxed mb-12 max-w-sm text-sm lg:text-base">
-                Complete the form and our team will respond within 2 hours with driver details,
-                confirmation, and your fixed price. No hidden fees — ever.
-              </p>
+            {/* Split layout: form + contact info */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-16 lg:gap-24">
 
-              {/* Contact methods */}
-              <div className="space-y-8">
+              {/* Form */}
+              <div
+                className={`bg-[#ffffff] relative transition-all duration-700 delay-100 ${formRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+              >
+                <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
+
+                <div className="p-8 sm:p-12 lg:p-14">
+                  {formStatus === 'success' ? (
+                    <div className="flex flex-col items-center justify-center text-center" style={{ minHeight: '500px' }}>
+                      <div
+                        className="w-20 h-20 flex items-center justify-center mb-8"
+                        style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
+                      >
+                        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div className="w-12 h-px mb-8" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
+                      <h3 className="text-3xl font-black text-gray-900 tracking-tight mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
+                        Booking Confirmed.
+                      </h3>
+                      <p className="text-gray-500 font-light max-w-sm leading-relaxed mb-8">
+                        Your transfer request has been received. We will confirm your booking and share driver details within 1 hour.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setFormStatus('idle')}
+                        className="text-xs font-bold tracking-widest uppercase text-[#5e17eb] hover:text-[#1800ad] transition-colors"
+                      >
+                        Book Another Transfer
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                      {/* Name row */}
+                      <div className="grid grid-cols-12 gap-6">
+                        <div className="col-span-2">
+                          <FormField label="Title" required>
+                            <div className="relative">
+                              <select className={SelectBase} required defaultValue="">
+                                <option value="" disabled>—</option>
+                                <option>Mr.</option>
+                                <option>Ms.</option>
+                                <option>Mrs.</option>
+                                <option>Dr.</option>
+                                <option>Prof.</option>
+                              </select>
+                              <div className="absolute right-0 bottom-2.5 pointer-events-none text-gray-400">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="square" d="M19 9l-7 7-7-7" /></svg>
+                              </div>
+                            </div>
+                          </FormField>
+                        </div>
+                        <div className="col-span-10">
+                          <FormField label="Full Name" required>
+                            <input type="text" className={InputBase} placeholder="Your full name" required />
+                          </FormField>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <FormField label="Email Address" required>
+                          <input type="email" className={InputBase} placeholder="your@email.com" required />
+                        </FormField>
+                        <FormField label="Phone / WhatsApp" required>
+                          <input type="tel" className={InputBase} placeholder="+94 77 123 4567" required />
+                        </FormField>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <FormField label="Preferred Contact" required>
+                          <div className="relative">
+                            <select className={SelectBase} required defaultValue="">
+                              <option value="" disabled>Select method</option>
+                              <option>Email</option>
+                              <option>WhatsApp</option>
+                              <option>Other</option>
+                            </select>
+                            <div className="absolute right-0 bottom-2.5 pointer-events-none text-gray-400">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="square" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                          </div>
+                        </FormField>
+                        <FormField label="Vehicle Preference">
+                          <div className="relative">
+                            <select className={SelectBase} defaultValue="">
+                              <option value="" disabled>Select vehicle</option>
+                              <option>Executive Sedan</option>
+                              <option>Premium SUV</option>
+                              <option>Luxury Van</option>
+                              <option>Any Available</option>
+                            </select>
+                            <div className="absolute right-0 bottom-2.5 pointer-events-none text-gray-400">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="square" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                          </div>
+                        </FormField>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <FormField label="Pickup Location" required>
+                          <input type="text" className={InputBase} placeholder="e.g. Colombo Airport, Terminal 1…" required />
+                        </FormField>
+                        <FormField label="Pickup Date & Time" required>
+                          <input type="datetime-local" className={InputBase} required />
+                        </FormField>
+                      </div>
+
+                      <FormField label="Arrival / Destination" required>
+                        <input type="text" className={InputBase} placeholder="e.g. Sigiriya Rock View Hotel, Kandy…" required />
+                      </FormField>
+
+                      {/* Group size */}
+                      <div>
+                        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-4">
+                          Number of Passengers
+                        </p>
+                        <div className="grid grid-cols-2 gap-8">
+                          <div>
+                            <p className="text-[9px] text-gray-400 mb-3">Adults</p>
+                            <div className="flex items-center gap-0 border-b border-gray-200 pb-2">
+                              <button type="button" onClick={() => setAdults(Math.max(1, adults - 1))}
+                                className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M20 12H4" /></svg>
+                              </button>
+                              <span className="w-12 text-center text-lg font-black text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>{adults}</span>
+                              <button type="button" onClick={() => setAdults(adults + 1)}
+                                className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M12 4v16m8-8H4" /></svg>
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[9px] text-gray-400 mb-3">Children</p>
+                            <div className="flex items-center gap-0 border-b border-gray-200 pb-2">
+                              <button type="button" onClick={() => setChildren(Math.max(0, children - 1))}
+                                className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M20 12H4" /></svg>
+                              </button>
+                              <span className="w-12 text-center text-lg font-black text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>{children}</span>
+                              <button type="button" onClick={() => setChildren(children + 1)}
+                                className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M12 4v16m8-8H4" /></svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <FormField label="Luggage">
+                        <div className="relative">
+                          <select className={SelectBase} defaultValue="">
+                            <option value="" disabled>Select luggage type</option>
+                            <option>Light — carry-on bags only</option>
+                            <option>Standard — 1–2 checked bags</option>
+                            <option>Heavy — 3+ large bags</option>
+                            <option>Special — surfboards, bikes etc.</option>
+                          </select>
+                          <div className="absolute right-0 bottom-2.5 pointer-events-none text-gray-400">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="square" d="M19 9l-7 7-7-7" /></svg>
+                          </div>
+                        </div>
+                      </FormField>
+
+                      <FormField label="Additional Notes">
+                        <textarea
+                          className={`${InputBase} resize-none`}
+                          rows={4}
+                          placeholder="Flight number, special requirements, preferred route, child seat needed, meet & greet sign, language preference…"
+                        />
+                      </FormField>
+
+                      <div className="pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-[#e8e4df]">
+                        <p className="text-xs text-gray-400 font-light leading-relaxed max-w-xs">
+                          No upfront payment. We confirm within 1 hour with driver details and final price.
+                        </p>
+                        <button
+                          type="submit"
+                          disabled={formStatus === 'submitting'}
+                          className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 text-sm font-bold tracking-widest uppercase text-white transition-all duration-300 overflow-hidden disabled:opacity-70 flex-shrink-0"
+                        >
+                          <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105" style={{ background: 'linear-gradient(135deg, #5e17eb 0%, #1800ad 100%)' }} />
+                          <span className="relative z-10 flex items-center gap-3">
+                            {formStatus === 'submitting' ? (
+                              <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4} />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                                Sending…
+                              </>
+                            ) : (
+                              <>
+                                Book My Transfer
+                                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                  <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                              </>
+                            )}
+                          </span>
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
+
+              {/* Contact info sidebar */}
+              <div
+                className={`space-y-10 transition-all duration-700 delay-200 ${formRef.inView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
+              >
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
+                    Reach Our Drivers
+                    <br />
+                    <span style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                      Directly.
+                    </span>
+                  </h3>
+                  <p className="text-gray-500 font-light leading-relaxed text-sm">
+                    For urgent bookings, immediate airport pickups or last-minute transfers,
+                    contact us directly on WhatsApp or phone. We respond within minutes.
+                  </p>
+                </div>
+
                 {[
-                  { label: '24/7 Concierge', val: '+94 77 123 4567', sub: 'Call or WhatsApp any time', icon: '📞' },
-                  { label: 'Email', val: 'taxi@triptip.lk', sub: 'For advance bookings', icon: '✉️' },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-start gap-5 group">
-                    <div className="p-3 bg-[#f4f4f4] text-[#1800ad] transition-colors duration-300 group-hover:bg-[#5e17eb] group-hover:text-white text-lg">
-                      {item.icon}
+                  {
+                    label: 'Taxi Hotline',
+                    value: '+94 77 123 4567',
+                    sub: 'Available 24/7 — immediate response',
+                    icon: (
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="square" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.896-1.95-5.066-4.12-7.016-7.016l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'WhatsApp',
+                    value: '+94 77 123 4567',
+                    sub: 'Share your flight details instantly',
+                    icon: (
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="square" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'Email',
+                    value: 'taxi@triptip.lk',
+                    sub: 'For advance bookings & corporate accounts',
+                    icon: (
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="square" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                      </svg>
+                    ),
+                  },
+                ].map((c, i) => (
+                  <div key={i} className="flex items-start gap-5 group">
+                    <div className="p-4 bg-[#ffffff] text-[#1800ad] transition-all duration-300 group-hover:text-white flex-shrink-0"
+                      style={{ transition: 'background .3s, color .3s' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg,#5e17eb,#1800ad)'; (e.currentTarget as HTMLElement).style.color = '#fff'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#ffffff'; (e.currentTarget as HTMLElement).style.color = '#1800ad'; }}
+                    >
+                      {c.icon}
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 block mb-1">{item.label}</span>
-                      <p className="text-base font-bold text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>{item.val}</p>
-                      <p className="text-xs text-gray-400 font-light">{item.sub}</p>
+                      <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-1" style={{ fontFamily: "'DM Sans', sans-serif" }}>{c.label}</p>
+                      <p className="text-xl font-bold text-gray-900 mb-0.5" style={{ fontFamily: "'Syne', sans-serif" }}>{c.value}</p>
+                      <p className="text-xs text-gray-500 font-light">{c.sub}</p>
                     </div>
                   </div>
                 ))}
-              </div>
 
-              {/* Trust badges */}
-              <div className="mt-12 pt-10 border-t border-[#e8e4df] grid grid-cols-3 gap-4">
-                {['Fixed Price', 'No Card Needed', 'Instant Confirm'].map((badge) => (
-                  <div key={badge} className="text-center">
-                    <div
-                      className="w-8 h-8 mx-auto mb-2 flex items-center justify-center text-white text-xs font-bold"
-                      style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
-                    >
-                      ✓
-                    </div>
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-gray-500">{badge}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: Form */}
-            <div
-              className={`bg-[#f9f9f9] p-8 sm:p-12 relative transition-all duration-700 delay-300 ${bookingRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
-            >
-              {/* Top gradient bar */}
-              <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
-
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>
-                Ride Reservation
-              </h3>
-              <p className="text-sm text-gray-400 mb-10 font-light">We confirm within 2 hours.</p>
-
-              <BookingForm />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ================================================================ */}
-      {/* WHY CHOOSE US — 4 PILLARS                                        */}
-      {/* ================================================================ */}
-      <div
-        ref={pillarsRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-24 lg:py-32 relative overflow-hidden"
-      >
-        {/* Watermark */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute right-0 top-4 font-black leading-none text-[#d4cfc9] tracking-tighter z-0"
-          style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(90px,14vw,180px)' }}
-        >
-          TRUST
-        </span>
-
-        <div className="max-w-[1800px] mx-auto relative z-10">
-          {/* Header */}
-          <div className={`flex items-center gap-4 mb-16 transition-all duration-700 ${pillarsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <div className="w-1 h-10 bg-[#5e17eb]" />
-            <div>
-              <span className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Why Sri Lankan TripTip
-              </span>
-              <h2
-                className="text-[clamp(32px,4.5vw,60px)] font-black text-gray-900 tracking-tight leading-tight mt-1"
-                style={{ fontFamily: "'Syne', sans-serif" }}
-              >
-                The Standard We Hold
-                <br />
-                <span style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  Every Single Ride.
-                </span>
-              </h2>
-            </div>
-          </div>
-
-          {/* Pillars grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 divide-y md:divide-y-0 md:divide-x divide-[#ccc9c4]">
-            {pillars.map((p, i) => (
-              <div
-                key={p.num}
-                className={`group relative px-0 md:px-10 first:pl-0 last:pr-0 py-10 md:py-0 transition-all duration-700 ${pillarsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: `${i * 120}ms` }}
-              >
-                {/* Number watermark */}
-                <span
-                  className="block text-[clamp(52px,6vw,84px)] font-black leading-none tracking-tighter text-[#ccc9c4] select-none mb-4 transition-colors duration-300 group-hover:text-[#d4cbf5]"
-                  style={{ fontFamily: "'Syne', sans-serif" }}
-                  aria-hidden="true"
-                >
-                  {p.num}
-                </span>
-
-                {/* Icon */}
+                {/* Promise card */}
                 <div
-                  className="w-10 h-10 flex items-center justify-center mb-5 text-white transition-all duration-300"
+                  className="p-8"
                   style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
                 >
-                  {p.icon}
+                  <div className="w-8 h-px bg-white/30 mb-5" />
+                  <h4
+                    className="text-xl font-black text-white tracking-tight leading-tight mb-3"
+                    style={{ fontFamily: "'Syne', sans-serif" }}
+                  >
+                    Our Driver Promise.
+                  </h4>
+                  <ul className="space-y-2.5">
+                    {[
+                      'Punctual — always on time, every time',
+                      'Polite — professional and respectful',
+                      'Knowledgeable — local insights on request',
+                      'Flexible — wait times never charged',
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="w-4 h-4 bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-sm text-white/80 font-light leading-snug">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SERVICE TYPES ────────────────── */}
+        <div
+          ref={serviceRef.ref as React.RefObject<HTMLDivElement>}
+          className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
+        >
+          <div className="max-w-[1400px] mx-auto">
+            <div className={`flex items-center gap-4 mb-16 transition-all duration-700 ${serviceRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <div className="w-1 h-10 bg-[#5e17eb]" />
+              <div>
+                <p className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>Our Services</p>
+                <p className="text-xs text-gray-400 tracking-widest uppercase mt-0.5">What we offer</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border border-[#e8e4df]">
+              {serviceTypes.map((svc, i) => (
+                <div
+                  key={svc.title}
+                  className={`group relative p-8 lg:p-10 border-r border-b border-[#e8e4df] [&:nth-child(3n)]:border-r-0 [&:nth-child(n+4)]:border-b-0 hover:bg-[#ffffff] transition-all duration-300 bg-[#fafafa] ${serviceRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                  style={{ transitionDelay: serviceRef.inView ? `${i * 70}ms` : '0ms' }}
+                >
+                  <div className="absolute top-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500 ease-out"
+                    style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
+
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="text-3xl">{svc.icon}</div>
+                    {svc.badge && (
+                      <span
+                        className="text-[8px] font-bold tracking-[0.25em] uppercase px-2.5 py-1 text-[#5e17eb] border border-[#5e17eb]/20 bg-[#f8f6ff]"
+                        style={{ fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        {svc.badge}
+                      </span>
+                    )}
+                  </div>
+                  <h3
+                    className="text-lg font-black text-gray-900 tracking-tight mb-3 group-hover:text-[#5e17eb] transition-colors duration-300"
+                    style={{ fontFamily: "'Syne', sans-serif" }}
+                  >
+                    {svc.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 font-light leading-relaxed">{svc.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── OUR FLEET ────────────────────── */}
+        <div
+          ref={fleetRef.ref as React.RefObject<HTMLDivElement>}
+          className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
+        >
+          <div className="max-w-[1400px] mx-auto">
+            <div className={`flex items-center gap-4 mb-16 transition-all duration-700 ${fleetRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <div className="w-1 h-10 bg-[#5e17eb]" />
+              <div>
+                <p className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>Our Fleet</p>
+                <p className="text-xs text-gray-400 tracking-widest uppercase mt-0.5">Choose your vehicle</p>
+              </div>
+            </div>
+
+            {/* Fleet selector tabs */}
+            <div className="flex items-center gap-0 border-b border-[#e8e4df] mb-10">
+              {vehicleFleet.map((v, i) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setActiveVehicle(i)}
+                  className="relative px-6 py-3 text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300"
+                  style={{ color: activeVehicle === i ? '#5e17eb' : '#aaa', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  {v.name}
+                  <span
+                    className="absolute bottom-0 left-0 h-[2px] transition-all duration-300"
+                    style={{ width: activeVehicle === i ? '100%' : '0%', background: 'linear-gradient(to right, #5e17eb, #1800ad)' }}
+                  />
+                </button>
+              ))}
+            </div>
+
+            {/* Active vehicle panel */}
+            {vehicleFleet.map((v, i) => (
+              <div
+                key={v.id}
+                className={`grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10 lg:gap-16 items-center transition-all duration-500 ${activeVehicle === i ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 hidden'}`}
+              >
+                {/* Image */}
+                <div className="relative overflow-hidden aspect-video">
+                  <img
+                    src={v.image}
+                    alt={v.name}
+                    className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-105"
+                  />
+                  <div className="absolute inset-0 opacity-10" style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }} />
+                  {v.badge && (
+                    <div className="absolute top-5 left-5">
+                      <span
+                        className="text-[9px] font-bold tracking-[0.3em] uppercase px-3 py-1.5 text-white"
+                        style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        {v.badge}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <h3
-                  className="text-lg font-black text-gray-900 tracking-tight mb-3 transition-colors duration-300 group-hover:text-[#5e17eb]"
-                  style={{ fontFamily: "'Syne', sans-serif" }}
-                >
-                  {p.title}
-                </h3>
-                <p className="text-sm text-gray-500 leading-relaxed font-light">{p.body}</p>
+                {/* Details */}
+                <div>
+                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#5e17eb] block mb-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                    {v.model}
+                  </span>
+                  <h2
+                    className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight mb-6"
+                    style={{ fontFamily: "'Syne', sans-serif" }}
+                  >
+                    {v.name}
+                  </h2>
 
-                {/* Bottom accent on hover */}
-                <div
-                  className="absolute bottom-0 left-0 h-[2px] w-0 transition-all duration-500 ease-out group-hover:w-full md:bottom-auto md:top-0"
-                  style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }}
-                />
+                  {/* Specs */}
+                  <div className="grid grid-cols-2 gap-0 mb-8 border border-[#e8e4df]">
+                    <div className="p-4 border-r border-b border-[#e8e4df]">
+                      <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 mb-1">Capacity</p>
+                      <p className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>{v.capacity}</p>
+                    </div>
+                    <div className="p-4 border-b border-[#e8e4df]">
+                      <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 mb-1">Luggage</p>
+                      <p className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>{v.luggage}</p>
+                    </div>
+                    <div className="p-4 border-r border-[#e8e4df]">
+                      <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 mb-1">Starting Price</p>
+                      <p className="text-sm font-bold" style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        {v.priceFrom}
+                      </p>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 mb-1">Availability</p>
+                      <p className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>24/7</p>
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div className="space-y-2 mb-8">
+                    {v.features.map((f, fi) => (
+                      <div key={fi} className="flex items-center gap-3">
+                        <div
+                          className="w-5 h-5 flex items-center justify-center text-white flex-shrink-0"
+                          style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
+                        >
+                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-sm text-gray-600 font-light">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const formEl = document.getElementById('booking-form');
+                      if (formEl) formEl.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="group inline-flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase text-white transition-all duration-300 hover:gap-5"
+                    style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
+                  >
+                    Book This Vehicle
+                    <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* ================================================================ */}
-      {/* FLEET SECTION                                                     */}
-      {/* ================================================================ */}
-      <div
-        ref={fleetRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-24 lg:py-32 relative overflow-hidden"
-      >
-        {/* Watermark */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute left-[-2%] top-[5%] font-black leading-none text-[#f4f4f4] tracking-tighter z-0"
-          style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(100px,16vw,200px)' }}
+        {/* ── VEHICLE CONDITIONS ────────────── */}
+        <div
+          ref={conditionsRef.ref as React.RefObject<HTMLDivElement>}
+          className="bg-[#e8e4df] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
         >
-          FLEET
-        </span>
-
-        <div className="max-w-[1800px] mx-auto relative z-10">
-          {/* Header */}
-          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 transition-all duration-700 ${fleetRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <div>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-1 h-8 bg-[#5e17eb]" />
-                <span className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                  Our Fleet
-                </span>
+          <div className="max-w-[1400px] mx-auto">
+            {/* Section header */}
+            <div className={`mb-16 transition-all duration-700 ${conditionsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-1 h-10 bg-[#5e17eb]" />
+                <div>
+                  <p className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                    Vehicle Standards
+                  </p>
+                  <p className="text-xs text-gray-500 tracking-widest uppercase mt-0.5">Our commitment to quality</p>
+                </div>
               </div>
               <h2
-                className="text-[clamp(36px,5vw,72px)] font-black text-gray-900 tracking-tight leading-tight"
+                className="text-[clamp(32px,5vw,70px)] font-black tracking-tighter text-gray-900 leading-[0.93] max-w-2xl"
                 style={{ fontFamily: "'Syne', sans-serif" }}
               >
-                Choose Your
+                You Deserve a Vehicle
                 <br />
                 <span style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  Level of Comfort.
+                  That Matches the Journey.
                 </span>
               </h2>
             </div>
-            <p className="max-w-sm text-gray-500 font-light leading-relaxed text-sm lg:text-base lg:pb-3">
-              Three tiers of service, each maintained to exacting standards. Every vehicle
-              is GPS-tracked and air-conditioned.
-            </p>
-          </div>
 
-          {/* Fleet grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {fleetCategories.map((car, i) => (
-              <FleetCard key={car.id} car={car} index={i} inView={fleetRef.inView} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ================================================================ */}
-      {/* POPULAR ROUTES STRIP                                             */}
-      {/* ================================================================ */}
-      <div
-        ref={routesRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-12 py-20 lg:py-24"
-      >
-        <div className="max-w-[1800px] mx-auto">
-          {/* Header */}
-          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12 transition-all duration-700 ${routesRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-8 bg-[#5e17eb]" />
-              <span className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Popular Routes
-              </span>
-            </div>
-            <p className="text-xs text-gray-400 tracking-widest uppercase">Fixed fares · No surprises</p>
-          </div>
-
-          {/* Routes table */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border border-[#e8e4df]">
-            {routes.map((route, i) => (
-              <div
-                key={i}
-                className={`group relative p-8 border-b border-r border-[#e8e4df] last:border-r-0 transition-all duration-700 hover:bg-white cursor-pointer ${routesRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-                style={{ transitionDelay: `${i * 80}ms` }}
-                onClick={() => document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                {/* Top accent line */}
+            {/* Conditions — alternating layout */}
+            <div className="space-y-12 lg:space-y-0 lg:divide-y lg:divide-[#d4cfc9]">
+              {vehicleConditions.map((cond, i) => (
                 <div
-                  className="absolute top-0 left-0 h-[2px] w-0 transition-all duration-500 group-hover:w-full"
-                  style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }}
-                />
-
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">From</span>
+                  key={cond.id}
+                  className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center py-0 lg:py-16 transition-all duration-800 ease-out ${conditionsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: conditionsRef.inView ? `${i * 150}ms` : '0ms' }}
+                >
+                  {/* Image — alternates left/right */}
+                  <div className={`relative overflow-hidden ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
+                    <div style={{ aspectRatio: '16/10' }}>
+                      <img
+                        src={cond.image}
+                        alt={cond.category}
+                        className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-104"
+                      />
+                      <div className="absolute inset-0 opacity-10" style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }} />
                     </div>
-                    <p className="text-base font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
-                      {route.from}
-                    </p>
+                    {/* Category badge on image */}
+                    <div className="absolute bottom-5 left-5">
+                      <span
+                        className="text-[9px] font-bold tracking-[0.3em] uppercase px-3 py-1.5 text-white backdrop-blur-sm"
+                        style={{ background: 'rgba(94,23,235,0.85)', fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        {cond.category}
+                      </span>
+                    </div>
                   </div>
-                  <div className="px-3 pt-1">
-                    <svg className="w-5 h-5 text-[#5e17eb] transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 text-right">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">To</span>
-                    <p className="text-base font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
-                      {route.to}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-6 pt-4 border-t border-[#e8e4df]">
-                  <div>
-                    <span className="text-[10px] text-gray-400 tracking-widest uppercase block mb-0.5">Duration</span>
-                    <span className="text-sm font-bold text-gray-700">{route.duration}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-gray-400 tracking-widest uppercase block mb-0.5">Distance</span>
-                    <span className="text-sm font-bold text-gray-700">{route.distance}</span>
-                  </div>
-                  <div className="ml-auto">
-                    <span
-                      className="text-[10px] font-bold tracking-[0.2em] uppercase transition-colors duration-300 group-hover:text-[#5e17eb] text-gray-400"
+                  {/* Text */}
+                  <div className={i % 2 === 1 ? 'lg:order-1' : ''}>
+                    {/* Icon */}
+                    <div
+                      className="w-12 h-12 flex items-center justify-center text-white mb-6"
+                      style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }}
                     >
-                      Book →
+                      {cond.icon}
+                    </div>
+
+                    <span
+                      className="block text-[10px] font-bold tracking-[0.3em] uppercase text-[#5e17eb] mb-3"
+                      style={{ fontFamily: "'DM Sans', sans-serif" }}
+                    >
+                      {cond.category}
                     </span>
+
+                    <h3
+                      className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight mb-5"
+                      style={{ fontFamily: "'Syne', sans-serif" }}
+                    >
+                      {cond.headline}
+                    </h3>
+
+                    <p className="text-base text-gray-600 font-light leading-relaxed mb-8">
+                      {cond.body}
+                    </p>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-0 border border-[#d4cfc9]">
+                      {cond.stats.map((s, si) => (
+                        <div
+                          key={si}
+                          className="px-4 py-4 border-r border-[#d4cfc9] last:border-r-0"
+                        >
+                          <p
+                            className="text-sm font-black text-gray-900 mb-1 leading-tight"
+                            style={{ fontFamily: "'Syne', sans-serif" }}
+                          >
+                            {s.value}
+                          </p>
+                          <p className="text-[9px] text-gray-500 font-light uppercase tracking-widest leading-tight">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-xs text-gray-400 tracking-wide mt-6">
-            Not your route? We cover the entire island.{' '}
-            <a href="#booking" className="text-[#5e17eb] hover:text-[#1800ad] transition-colors font-bold">
-              Request a custom quote →
-            </a>
-          </p>
-        </div>
-      </div>
-
-      {/* ================================================================ */}
-      {/* EDITORIAL SPLIT — ATMOSPHERE BAND                                */}
-      {/* ================================================================ */}
-      <div className="bg-[#050507] px-6 sm:px-10 lg:px-12 py-24 lg:py-32 relative overflow-hidden">
-        {/* Dot grid */}
-        <div
-          aria-hidden="true"
-          className="absolute top-0 right-0 w-[40%] h-full opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        {/* Purple glow */}
-        <div
-          className="absolute bottom-0 left-0 w-[500px] h-[500px] blur-[180px] opacity-15 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #5e17eb, transparent 70%)' }}
-        />
-
-        <div className="max-w-[1800px] mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-16 lg:gap-24 items-center">
-          {/* Left */}
-          <div>
-            <div className="w-10 h-px mb-10" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
-            <h2
-              className="text-[clamp(36px,5.5vw,80px)] font-black text-white leading-[0.95] tracking-tighter mb-8"
-              style={{ fontFamily: "'Syne', sans-serif" }}
-            >
-              Not a Car Service.
-              <br />
-              <span style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                A Standard.
-              </span>
-            </h2>
-            <p className="text-white/55 font-light leading-relaxed text-base sm:text-lg max-w-lg mb-10">
-              When you travel with Sri Lankan TripTip, you are not hailing a cab. You are engaging
-              a service that thinks about your journey from the moment you land until the moment
-              you walk through your door.
-            </p>
-            <p className="text-white/55 font-light leading-relaxed text-base sm:text-lg max-w-lg">
-              That means flight monitoring. Proactive communication. A driver who knows the
-              quieter road that saves 20 minutes. Chilled water waiting. And the confidence to
-              know that, whatever happens, someone is already handling it.
-            </p>
-          </div>
-
-          {/* Right — Image with floating card */}
-          <div className="relative">
-            <div className="relative overflow-hidden" style={{ aspectRatio: '3/4' }}>
-              <img
-                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=90"
-                alt="Professional chauffeur service"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 opacity-20" style={{ background: 'linear-gradient(135deg, #5e17eb, transparent 60%)' }} />
+              ))}
             </div>
-
-            {/* Floating stat card */}
-            <div
-              className="absolute -bottom-6 -left-6 p-6 z-10 shadow-2xl"
-              style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', minWidth: '180px' }}
-            >
-              <div className="text-4xl font-black text-white leading-none mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>
-                98%
-              </div>
-              <div className="text-[10px] tracking-[0.2em] uppercase text-white/70">On-time arrival<br />rate, verified</div>
-            </div>
-
-            {/* Dot grid accent */}
-            <div
-              aria-hidden="true"
-              className="absolute -top-4 -right-4 w-24 h-24 opacity-20"
-              style={{
-                backgroundImage: 'radial-gradient(circle, #5e17eb 1.5px, transparent 1.5px)',
-                backgroundSize: '10px 10px',
-              }}
-            />
           </div>
         </div>
-      </div>
 
+       
 
-      {/* ================================================================ */}
-      {/* CLOSING CTA BAND                                                 */}
-      {/* ================================================================ */}
-      <div
-        ref={closingRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-20 lg:py-24 overflow-hidden relative"
-      >
-        {/* Ghost text */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute -right-4 top-1/2 -translate-y-1/2 font-black leading-none text-[#d4cfc9] tracking-tighter"
-          style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(80px,12vw,160px)' }}
+        {/* ── CTA STRIP ─────────────────────── */}
+        <div
+          ref={ctaRef.ref as React.RefObject<HTMLDivElement>}
+          className="bg-[#0d0d0d] px-6 sm:px-10 lg:px-20 py-16 lg:py-20 overflow-hidden relative"
         >
-          RIDE
-        </span>
-
-        <div className="max-w-[1800px] mx-auto relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12">
-          <div>
-            <div className={`flex items-center gap-3 mb-6 transition-all duration-700 ${closingRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-              <div className="h-px w-8 bg-[#5e17eb]" />
-              <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#5e17eb]">Always On Time</span>
+          <div
+            aria-hidden="true"
+            className="absolute top-0 right-0 w-64 h-64 opacity-[0.05]"
+            style={{ backgroundImage: 'radial-gradient(circle, #5e17eb 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}
+          />
+          <div className="max-w-[1400px] mx-auto relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+            <div>
+              <div className={`flex items-center gap-3 mb-6 transition-all duration-700 ${ctaRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                <div className="h-px w-8 bg-[#5e17eb]" />
+                <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#5e17eb]">Planning a multi-day trip?</span>
+              </div>
+              <h3
+                className={`font-black text-white tracking-tight leading-[0.95] transition-all duration-700 delay-100 ${ctaRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(24px, 4vw, 52px)' }}
+              >
+                Need More Than a Ride?
+                <br />
+                <span style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  We Do Full Tours Too.
+                </span>
+              </h3>
             </div>
-            <h3
-              className={`font-black text-gray-900 tracking-tighter leading-[0.95] transition-all duration-700 delay-100 ${closingRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-              style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(28px,4.5vw,58px)' }}
-            >
-              Next time you need a taxi
-              <br />
-              in Sri Lanka,{' '}
-              <span style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                you already know us.
-              </span>
-            </h3>
-          </div>
-
-          <div className={`flex flex-col sm:flex-row gap-4 flex-shrink-0 transition-all duration-700 delay-200 ${closingRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <a
-              href="#booking"
-              className="group inline-flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase text-white transition-all duration-300 hover:opacity-90 hover:gap-5"
-              style={{ background: 'linear-gradient(135deg, #5e17eb 0%, #1800ad 100%)' }}
-            >
-              Book Now
-              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </a>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase text-gray-900 border border-gray-300 transition-all duration-300 hover:border-[#5e17eb] hover:text-[#5e17eb]"
-            >
-              Get in Touch
-            </Link>
+            <div className={`flex flex-col sm:flex-row gap-4 flex-shrink-0 transition-all duration-700 delay-200 ${ctaRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+              <Link
+                href="/tours"
+                className="group inline-flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase text-white transition-all duration-300 hover:opacity-90 hover:gap-5"
+                style={{ background: 'linear-gradient(135deg, #5e17eb 0%, #1800ad 100%)' }}
+              >
+                Browse Tours
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <Link
+                href="/custom-planning"
+                className="inline-flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase text-white/60 border border-white/15 transition-all duration-300 hover:border-white/30 hover:text-white"
+              >
+                Custom Planning
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+
+      </main>
 
       <Footer />
-    </main>
+    </>
   );
 };
 

@@ -100,6 +100,39 @@ const AboutSection: React.FC = () => {
       className="bg-[#f4f4f4] overflow-hidden"
       style={{ fontFamily: "'DM Sans', 'Syne', sans-serif" }}
     >
+       {/* ── STATS BAND ──────────────────────────── */}
+      <div
+        ref={statsRef.ref as React.RefObject<HTMLDivElement>}
+        className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-16"
+      >
+        <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-[#e8e4df]">
+          {stats.map((s, i) => (
+            <div
+              key={s.label}
+              className={`px-6 lg:px-10 first:pl-0 last:pr-0 transition-all duration-700 ease-out ${
+                statsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
+              style={{ transitionDelay: statsRef.inView ? `${i * 100}ms` : '0ms' }}
+            >
+              <div
+                className="text-[clamp(40px,5vw,72px)] font-black leading-none tracking-tighter mb-2"
+                style={{
+                  fontFamily: "'Syne', 'DM Sans', sans-serif",
+                  background: 'linear-gradient(135deg, #5e17eb 30%, #1800ad 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                <Counter target={s.value} suffix={s.suffix} inView={statsRef.inView} />
+              </div>
+              <div className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-1">
+                {s.label}
+              </div>
+              <div className="text-xs text-gray-400 leading-snug">{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
       {/* ── HERO BAND ───────────────────────────── */}
       <div
         ref={heroRef.ref as React.RefObject<HTMLDivElement>}
@@ -114,7 +147,7 @@ const AboutSection: React.FC = () => {
           ABOUT
         </span>
 
-        <div className="relative z-10 max-w-[1800px] mx-auto">
+        <div className="relative z-10 max-w-[1400px] mx-auto">
           {/* Label */}
           <div
             className={`flex items-center gap-3 mb-10 transition-all duration-700 ease-out ${
@@ -178,46 +211,14 @@ const AboutSection: React.FC = () => {
         <div className="mt-16 w-full h-px bg-[#e8e4df]" />
       </div>
 
-      {/* ── STATS BAND ──────────────────────────── */}
-      <div
-        ref={statsRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-16"
-      >
-        <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-[#e8e4df]">
-          {stats.map((s, i) => (
-            <div
-              key={s.label}
-              className={`px-6 lg:px-10 first:pl-0 last:pr-0 transition-all duration-700 ease-out ${
-                statsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-              style={{ transitionDelay: statsRef.inView ? `${i * 100}ms` : '0ms' }}
-            >
-              <div
-                className="text-[clamp(40px,5vw,72px)] font-black leading-none tracking-tighter mb-2"
-                style={{
-                  fontFamily: "'Syne', 'DM Sans', sans-serif",
-                  background: 'linear-gradient(135deg, #5e17eb 30%, #1800ad 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                <Counter target={s.value} suffix={s.suffix} inView={statsRef.inView} />
-              </div>
-              <div className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-1">
-                {s.label}
-              </div>
-              <div className="text-xs text-gray-400 leading-snug">{s.desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+     
 
       {/* ── STORY + IMAGE BAND ──────────────────── */}
       <div
         ref={missionRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-24 lg:py-32"
       >
-        <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-center">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-16 lg:gap-24 items-center">
           {/* Left — story text */}
           <div
             className={`transition-all duration-800 ease-out ${
@@ -347,7 +348,7 @@ const AboutSection: React.FC = () => {
         ref={pillarsRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-24 lg:py-32"
       >
-        <div className="max-w-[1800px] mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           {/* Section label */}
           <div
             className={`flex items-center gap-4 mb-16 transition-all duration-700 ease-out ${
@@ -423,7 +424,7 @@ const AboutSection: React.FC = () => {
 
       {/* ── TRUST STRIP ─────────────────────────── */}
       <div className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-16">
-        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
           <div className="max-w-xl">
             <h3
               className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-tight"

@@ -79,7 +79,7 @@ const FooterSection: React.FC = () => {
         style={{ background: 'radial-gradient(circle, #5e17eb, transparent 70%)' }}
       /> */}
 
-      <div className="max-w-[1800px]  px-6 sm:px-10 lg:px-12 relative z-10">
+      <div className="max-w-[1500px] mx-auto px-6 sm:px-10 lg:px-12 relative z-10">
         
         {/* ── TOP: CALL TO ACTION ───────────────── */}
         <div 

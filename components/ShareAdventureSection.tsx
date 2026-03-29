@@ -155,7 +155,7 @@ const ShareAdventureSection: React.FC = () => {
           ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
         `}
       >
-        <div className="max-w-[1800px] mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           {/* Heading & Subheading */}
           <div className="mb-12 md:mb-16 lg:mb-20 max-w-[1800px] mx-auto">
             <h2

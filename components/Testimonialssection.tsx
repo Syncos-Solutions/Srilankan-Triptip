@@ -491,7 +491,7 @@ const TestimonialsSection: React.FC = () => {
           VOICES
         </span>
 
-        <div className="relative z-10 max-w-[1800px] mx-auto">
+        <div className="relative z-10 max-w-[1400px] mx-auto">
           {/* Label row */}
           <div
             className={`flex items-center gap-3 mb-10 transition-all duration-700 ${
@@ -555,7 +555,7 @@ const TestimonialsSection: React.FC = () => {
         ref={metricsRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-12"
       >
-        <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#e8e4df]">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#e8e4df]">
           {trustMetrics.map((m, i) => (
             <div
               key={m.label}
@@ -592,7 +592,7 @@ const TestimonialsSection: React.FC = () => {
         ref={featuredRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-12 py-20 lg:py-28"
       >
-        <div className="max-w-[1800px] mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           {/* Section micro-label */}
           <div
             className={`flex items-center gap-4 mb-12 transition-all duration-700 ${
@@ -683,7 +683,7 @@ const TestimonialsSection: React.FC = () => {
         ref={gridRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-20 lg:py-28"
       >
-        <div className="max-w-[1800px] mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           {/* Label */}
           <div
             className={`flex items-center gap-4 mb-14 transition-all duration-700 ${
@@ -747,7 +747,7 @@ const TestimonialsSection: React.FC = () => {
         ref={ctaRef.ref as React.RefObject<HTMLDivElement>}
         className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-20 lg:py-24 overflow-hidden"
       >
-        <div className="max-w-[1800px] mx-auto relative">
+        <div className="max-w-[1400px] mx-auto relative">
           {/* Decorative oversized text */}
           <span
             aria-hidden="true"
@@ -763,7 +763,7 @@ const TestimonialsSection: React.FC = () => {
           </span>
 
           <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12">
-            <div className="max-w-[1800px]">
+            <div className="max-w-[1400px]">
               <div
                 className={`flex items-center gap-3 mb-6 transition-all duration-700 ${
                   ctaRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'

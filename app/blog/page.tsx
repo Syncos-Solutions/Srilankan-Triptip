@@ -521,7 +521,7 @@ const BlogPage: React.FC = () => {
           JOURNAL
         </span>
 
-        <div className="relative z-10 max-w-[1800px] mx-auto">
+        <div className="relative z-10 max-w-[1400px] mx-auto">
           {/* Label */}
           <div
             className={`flex items-center gap-3 mb-10 transition-all duration-700 ${
@@ -585,7 +585,7 @@ const BlogPage: React.FC = () => {
       {/* FEATURED POST */}
       {/* ============================================================ */}
       <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 pb-0">
-        <div className="max-w-[1800px] mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           <FeaturedCard post={featured} />
         </div>
       </div>
@@ -594,7 +594,7 @@ const BlogPage: React.FC = () => {
       {/* CATEGORY FILTER */}
       {/* ============================================================ */}
       <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-8 border-b border-[#e8e4df] sticky top-0 z-30 backdrop-blur-sm">
-        <div className="max-w-[1800px] mx-auto flex items-center overflow-x-auto">
+        <div className="max-w-[1400px] mx-auto flex items-center overflow-x-auto">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -624,7 +624,7 @@ const BlogPage: React.FC = () => {
       {/* MAIN GRID + SIDEBAR */}
       {/* ============================================================ */}
       <div className="bg-[#ffffff] px-6 sm:px-10 lg:px-12 py-16 lg:py-24">
-        <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-16 lg:gap-20">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-16 lg:gap-20">
           {/* Left: Grid */}
           <div ref={gridRef.ref as React.RefObject<HTMLDivElement>}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-14">
@@ -751,7 +751,7 @@ const BlogPage: React.FC = () => {
       {/* CLOSING CTA */}
       {/* ============================================================ */}
       <div className="bg-[#e8e4df] px-6 sm:px-10 lg:px-12 py-20 lg:py-28">
-        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
           <div>
             <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#5e17eb] block mb-4">
               Ready to Go?
