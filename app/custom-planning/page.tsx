@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-
 import Footer from '@/components/Footer';
 
 // ─────────────────────────────────────────────
@@ -30,31 +29,31 @@ const useInView = (threshold = 0.08) => {
 // Types
 // ─────────────────────────────────────────────
 interface DayPlan {
-  day: number;
-  destination: string;
-  activities: string;
+  day:           number;
+  destination:   string;
+  activities:    string;
   accommodation: string;
-  notes: string;
+  notes:         string;
 }
 
 interface FormData {
-  salutation: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  contactMethod: string;
-  pickup: string;
-  startDate: string;
-  adults: number;
-  children: number;
-  luggage: string;
-  days: DayPlan[];
+  salutation:      string;
+  firstName:       string;
+  lastName:        string;
+  email:           string;
+  phone:           string;
+  contactMethod:   string;
+  pickup:          string;
+  startDate:       string;
+  adults:          number;
+  children:        number;
+  luggage:         string;
+  days:            DayPlan[];
   additionalNotes: string;
 }
 
 // ─────────────────────────────────────────────
-// Pillars data
+// Pillars data — unchanged
 // ─────────────────────────────────────────────
 const pillars = [
   {
@@ -65,7 +64,7 @@ const pillars = [
       </svg>
     ),
     title: 'Day-by-Day Architecture',
-    body: 'We build your itinerary one day at a time — with purpose. Each day is calibrated to your rhythm, not a tour operator\'s schedule.',
+    body: "We build your itinerary one day at a time — with purpose. Each day is calibrated to your rhythm, not a tour operator's schedule.",
   },
   {
     index: '02',
@@ -75,7 +74,7 @@ const pillars = [
       </svg>
     ),
     title: 'Secret Sri Lanka Access',
-    body: 'Pre-dawn Sigiriya. The astrologer\'s village in Kandy. The jungle pool that isn\'t on any map. We know them all — and we share them.',
+    body: "Pre-dawn Sigiriya. The astrologer's village in Kandy. The jungle pool that isn't on any map. We know them all — and we share them.",
   },
   {
     index: '03',
@@ -96,7 +95,7 @@ const pillars = [
       </svg>
     ),
     title: 'Full Transparency',
-    body: 'Every cost, every route, every reason — explained. No hidden charges, no vague itineraries. You see exactly what you\'re paying for.',
+    body: "Every cost, every route, every reason — explained. No hidden charges, no vague itineraries. You see exactly what you're paying for.",
   },
   {
     index: '05',
@@ -116,17 +115,17 @@ const pillars = [
       </svg>
     ),
     title: 'Flexibility Always',
-    body: 'Plans change. People do too. We accommodate on the road — same warmth, same service, zero stress about what wasn\'t in the brief.',
+    body: "Plans change. People do too. We accommodate on the road — same warmth, same service, zero stress about what wasn't in the brief.",
   },
 ];
 
 // ─────────────────────────────────────────────
-// Form Field Components
+// Form Field Components — unchanged
 // ─────────────────────────────────────────────
 const FormField: React.FC<{
-  label: string;
+  label:     string;
   required?: boolean;
-  children: React.ReactNode;
+  children:  React.ReactNode;
   className?: string;
 }> = ({ label, required, children, className = '' }) => (
   <div className={`relative group ${className}`}>
@@ -139,15 +138,15 @@ const FormField: React.FC<{
   </div>
 );
 
-const InputBase = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light placeholder-gray-300 focus:outline-none focus:border-transparent transition-all";
+const InputBase  = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light placeholder-gray-300 focus:outline-none focus:border-transparent transition-all";
 const SelectBase = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light focus:outline-none focus:border-transparent transition-all appearance-none cursor-pointer";
 
 // ─────────────────────────────────────────────
-// Day Planner Card
+// Day Planner Card — unchanged
 // ─────────────────────────────────────────────
 const DayCard: React.FC<{
-  day: DayPlan;
-  index: number;
+  day:      DayPlan;
+  index:    number;
   onUpdate: (index: number, field: keyof DayPlan, value: string) => void;
   onRemove: (index: number) => void;
   canRemove: boolean;
@@ -176,17 +175,11 @@ const DayCard: React.FC<{
           <div>
             <p
               className="text-xs font-bold tracking-[0.2em] uppercase transition-colors duration-300"
-              style={{
-                color: expanded ? '#5e17eb' : '#aaa',
-                fontFamily: "'DM Sans', sans-serif",
-              }}
+              style={{ color: expanded ? '#5e17eb' : '#aaa', fontFamily: "'DM Sans', sans-serif" }}
             >
               Day {day.day}
             </p>
-            <p
-              className="text-sm font-bold text-gray-900"
-              style={{ fontFamily: "'Syne', sans-serif" }}
-            >
+            <p className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>
               {day.destination || 'Destination not set'}
             </p>
           </div>
@@ -219,8 +212,7 @@ const DayCard: React.FC<{
         <div className="px-6 pb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-[#e8e4df]" style={{ paddingTop: '20px' }}>
           <FormField label="Destination / Location" required>
             <input
-              type="text"
-              className={InputBase}
+              type="text" className={InputBase}
               placeholder="e.g. Sigiriya, Kandy, Ella…"
               value={day.destination}
               onChange={(e) => onUpdate(index, 'destination', e.target.value)}
@@ -228,8 +220,7 @@ const DayCard: React.FC<{
           </FormField>
           <FormField label="Accommodation Preference">
             <input
-              type="text"
-              className={InputBase}
+              type="text" className={InputBase}
               placeholder="e.g. Boutique hotel, Homestay, Luxury resort…"
               value={day.accommodation}
               onChange={(e) => onUpdate(index, 'accommodation', e.target.value)}
@@ -237,8 +228,7 @@ const DayCard: React.FC<{
           </FormField>
           <FormField label="Activities & Experiences" className="sm:col-span-2">
             <input
-              type="text"
-              className={InputBase}
+              type="text" className={InputBase}
               placeholder="e.g. Sunrise hike, Temple visit, Cooking class, Whale watching…"
               value={day.activities}
               onChange={(e) => onUpdate(index, 'activities', e.target.value)}
@@ -263,28 +253,33 @@ const DayCard: React.FC<{
 // Main Page
 // ─────────────────────────────────────────────
 const CustomPlanningPage: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [isMenuOpen,  setIsMenuOpen]  = useState(false);
+  const [formStatus,  setFormStatus]  = useState<'idle' | 'submitting' | 'success'>('idle');
 
-  const heroRef = useInView(0.1);
+  // ── NEW state for live integration ──────────────────────────
+  const [bookingRef,  setBookingRef]  = useState<string>('');
+  const [totalDays,   setTotalDays]   = useState<number>(0);
+  const [formError,   setFormError]   = useState<string>('');
+
+  const heroRef    = useInView(0.1);
   const pillarsRef = useInView(0.08);
   const processRef = useInView(0.08);
-  const formRef = useInView(0.05);
-  const ctaRef = useInView(0.1);
+  const formRef    = useInView(0.05);
+  const ctaRef     = useInView(0.1);
 
   const [formData, setFormData] = useState<FormData>({
-    salutation: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    contactMethod: '',
-    pickup: '',
-    startDate: '',
-    adults: 1,
-    children: 0,
-    luggage: '',
-    days: [{ day: 1, destination: '', activities: '', accommodation: '', notes: '' }],
+    salutation:      '',
+    firstName:       '',
+    lastName:        '',
+    email:           '',
+    phone:           '',
+    contactMethod:   '',
+    pickup:          '',
+    startDate:       '',
+    adults:          1,
+    children:        0,
+    luggage:         '',
+    days:            [{ day: 1, destination: '', activities: '', accommodation: '', notes: '' }],
     additionalNotes: '',
   });
 
@@ -293,11 +288,11 @@ const CustomPlanningPage: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       days: [...prev.days, {
-        day: prev.days.length + 1,
-        destination: '',
-        activities: '',
+        day:           prev.days.length + 1,
+        destination:   '',
+        activities:    '',
         accommodation: '',
-        notes: '',
+        notes:         '',
       }],
     }));
   };
@@ -318,10 +313,51 @@ const CustomPlanningPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ── LIVE handleSubmit — replaces the old setTimeout mock ────
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus('submitting');
-    setTimeout(() => setFormStatus('success'), 2000);
+    setFormError('');
+
+    const payload = {
+      salutation:      formData.salutation,
+      firstName:       formData.firstName,
+      lastName:        formData.lastName,
+      email:           formData.email,
+      phone:           formData.phone,
+      contactMethod:   formData.contactMethod,
+      pickupLocation:  formData.pickup,
+      startDate:       formData.startDate,
+      adults:          formData.adults,
+      children:        formData.children,
+      luggageType:     formData.luggage,
+      days:            formData.days,
+      additionalNotes: formData.additionalNotes,
+    };
+
+    try {
+      const res  = await fetch('/api/custom-planning', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFormError(data.error || 'Something went wrong. Please try again.');
+        setFormStatus('idle');
+        return;
+      }
+
+      setBookingRef(data.bookingReference);
+      setTotalDays(data.totalDays ?? formData.days.length);
+      setFormStatus('success');
+
+    } catch {
+      setFormError('Network error. Please check your connection and try again.');
+      setFormStatus('idle');
+    }
   };
 
   return (
@@ -342,7 +378,6 @@ const CustomPlanningPage: React.FC = () => {
           ref={heroRef.ref as React.RefObject<HTMLDivElement>}
           className="relative bg-[#ffffff] px-6 sm:px-10 lg:px-20 pt-32 pb-0 overflow-hidden"
         >
-          {/* Giant watermark */}
           <span
             aria-hidden="true"
             className="pointer-events-none select-none absolute -right-4 top-2 font-black leading-none tracking-tighter text-[#f4f4f4]"
@@ -352,7 +387,6 @@ const CustomPlanningPage: React.FC = () => {
           </span>
 
           <div className="relative z-10 max-w-[1400px] mx-auto">
-            {/* Label */}
             <div className={`flex items-center gap-3 mb-10 transition-all duration-700 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               <span className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                 Sri Lankan TripTip
@@ -361,7 +395,6 @@ const CustomPlanningPage: React.FC = () => {
               <span className="text-xs tracking-widest text-gray-400 uppercase">Custom Planning</span>
             </div>
 
-            {/* Main headline */}
             <h1
               className={`font-black tracking-tighter text-gray-900 leading-[0.91] mb-0 transition-all duration-700 delay-100 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
               style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(44px,7.5vw,112px)' }}
@@ -373,7 +406,6 @@ const CustomPlanningPage: React.FC = () => {
               </span>
             </h1>
 
-            {/* Sub grid */}
             <div className={`mt-14 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-8 lg:gap-16 pb-20 transition-all duration-700 delay-200 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               <p className="text-base sm:text-lg text-gray-500 leading-relaxed font-light">
                 You tell us your passions — ruins, reefs, rice fields, rituals, or all of the above.
@@ -383,8 +415,8 @@ const CustomPlanningPage: React.FC = () => {
               <div className="flex flex-col gap-5">
                 {[
                   { stat: '100%', text: 'Custom — built around you, not a template' },
-                  { stat: '30+', text: 'Day itineraries crafted for demanding travellers' },
-                  { stat: '12+', text: 'Years mapping every secret corner of Sri Lanka' },
+                  { stat: '30+',  text: 'Day itineraries crafted for demanding travellers' },
+                  { stat: '12+',  text: 'Years mapping every secret corner of Sri Lanka' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-5">
                     <div
@@ -400,7 +432,6 @@ const CustomPlanningPage: React.FC = () => {
               </div>
             </div>
           </div>
-
           <div className="w-full h-px bg-[#e8e4df]" />
         </div>
 
@@ -416,11 +447,10 @@ const CustomPlanningPage: React.FC = () => {
               />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.05) 100%)' }} />
               <div className="absolute inset-0 opacity-15" style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)' }} />
-              {/* Left side quote */}
               <div className="absolute left-8 sm:left-12 lg:left-16 top-1/2 -translate-y-1/2 max-w-xs">
                 <div className="h-px w-10 mb-5" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
                 <p className="text-white font-black leading-tight tracking-tight" style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(18px, 2.5vw, 30px)' }}>
-                  "We don't do tours.<br />We do stories."
+                  &ldquo;We don&apos;t do tours.<br />We do stories.&rdquo;
                 </p>
                 <p className="text-white/50 text-xs mt-3 tracking-widest uppercase">— Sri Lankan TripTip</p>
               </div>
@@ -434,7 +464,6 @@ const CustomPlanningPage: React.FC = () => {
           className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
         >
           <div className="max-w-[1400px] mx-auto">
-            {/* Label */}
             <div className={`flex items-center gap-4 mb-16 transition-all duration-700 ${pillarsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               <div className="w-1 h-10 bg-[#5e17eb]" />
               <div>
@@ -443,7 +472,6 @@ const CustomPlanningPage: React.FC = () => {
               </div>
             </div>
 
-            {/* 3×2 grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border border-[#e8e4df]">
               {pillars.map((p, i) => (
                 <div
@@ -451,27 +479,14 @@ const CustomPlanningPage: React.FC = () => {
                   className={`group relative p-8 lg:p-10 border-r border-b border-[#e8e4df] last:border-r-0 [&:nth-child(3)]:border-r-0 [&:nth-child(4)]:border-b-0 [&:nth-child(5)]:border-b-0 [&:nth-child(6)]:border-b-0 hover:bg-[#fafafa] transition-all duration-400 ${pillarsRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                   style={{ transitionDelay: pillarsRef.inView ? `${i * 80}ms` : '0ms' }}
                 >
-                  {/* Top accent line on hover */}
                   <div className="absolute top-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500 ease-out"
                     style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
-
-                  {/* Icon */}
                   <div
-                    className="w-12 h-12 flex items-center justify-center mb-6 text-[#5e17eb] transition-all duration-300 group-hover:text-white"
-                    style={{ background: 'transparent', border: '1px solid #e8e4df', transition: 'background .3s, border-color .3s, color .3s' }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #5e17eb, #1800ad)';
-                      (e.currentTarget as HTMLElement).style.borderColor = 'transparent';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'transparent';
-                      (e.currentTarget as HTMLElement).style.borderColor = '#e8e4df';
-                    }}
+                    className="w-12 h-12 flex items-center justify-center mb-6 text-[#5e17eb]"
+                    style={{ border: '1px solid #e8e4df' }}
                   >
                     {p.icon}
                   </div>
-
-                  {/* Index */}
                   <span
                     className="block text-[52px] font-black leading-none tracking-tighter text-[#f0eeec] mb-3 select-none group-hover:text-[#ede9ff] transition-colors duration-300"
                     aria-hidden="true"
@@ -479,7 +494,6 @@ const CustomPlanningPage: React.FC = () => {
                   >
                     {p.index}
                   </span>
-
                   <h3
                     className="text-lg font-black text-gray-900 tracking-tight mb-3 transition-colors duration-300 group-hover:text-[#5e17eb]"
                     style={{ fontFamily: "'Syne', sans-serif" }}
@@ -499,7 +513,6 @@ const CustomPlanningPage: React.FC = () => {
           className="bg-[#ffffff] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
         >
           <div className="max-w-[1400px] mx-auto">
-            {/* Label */}
             <div className={`flex items-center gap-4 mb-16 transition-all duration-700 ${processRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               <div className="w-1 h-10 bg-[#5e17eb]" />
               <p className="text-xs font-bold tracking-[0.35em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -507,33 +520,24 @@ const CustomPlanningPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Steps */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-0">
               {[
-                { step: '01', title: 'Submit Your Vision', body: 'Fill in the planning form below. Be as detailed or as brief as you like — we work with both.' },
-                { step: '02', title: 'We Review & Refine', body: 'Within 24 hours, a real travel architect reviews your submission and reaches out with questions and ideas.' },
+                { step: '01', title: 'Submit Your Vision',    body: 'Fill in the planning form below. Be as detailed or as brief as you like — we work with both.' },
+                { step: '02', title: 'We Review & Refine',    body: 'Within 24 hours, a real travel architect reviews your submission and reaches out with questions and ideas.' },
                 { step: '03', title: 'We Build Your Journey', body: 'We craft a full day-by-day itinerary — with hidden gems, cultural depth and zero filler days.' },
-                { step: '04', title: 'You Arrive & Explore', body: 'We\'re on the ground with you throughout. Any change, any question, any moment — we\'re there.' },
+                { step: '04', title: 'You Arrive & Explore',  body: "We're on the ground with you throughout. Any change, any question, any moment — we're there." },
               ].map((s, i) => (
                 <div
                   key={s.step}
                   className={`relative p-8 lg:p-10 border-r border-[#e8e4df] last:border-r-0 transition-all duration-700 ${processRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                   style={{ transitionDelay: processRef.inView ? `${i * 100}ms` : '0ms' }}
                 >
-                  {/* Step number */}
                   <div
                     className="text-[64px] font-black leading-none tracking-tighter text-[#f4f4f4] mb-4 select-none"
                     style={{ fontFamily: "'Syne', sans-serif" }}
                   >
                     {s.step}
                   </div>
-                  {/* Connector line */}
-                  {i < 3 && (
-                    <div
-                      className="hidden md:block absolute right-0 top-12 w-px h-6"
-                      style={{ background: 'linear-gradient(to bottom, #5e17eb, #1800ad)' }}
-                    />
-                  )}
                   <h3 className="text-lg font-black text-gray-900 tracking-tight mb-3" style={{ fontFamily: "'Syne', sans-serif" }}>
                     {s.title}
                   </h3>
@@ -573,7 +577,7 @@ const CustomPlanningPage: React.FC = () => {
               </h2>
             </div>
 
-            {/* Form card */}
+            {/* ── SUCCESS STATE ─────────────────────────────── */}
             {formStatus === 'success' ? (
               <div
                 className="bg-[#ffffff] p-12 lg:p-16 flex flex-col items-center justify-center text-center"
@@ -594,34 +598,63 @@ const CustomPlanningPage: React.FC = () => {
                 >
                   Your Journey Begins.
                 </h3>
+
+                {/* Booking reference */}
+                {bookingRef && (
+                  <div
+                    className="mb-6 px-6 py-4 border-l-4 text-left w-full max-w-sm"
+                    style={{ background: '#f8f6ff', borderColor: '#5e17eb' }}
+                  >
+                    <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-1">
+                      Your Booking Reference
+                    </p>
+                    <p
+                      className="text-xl font-black tracking-widest mb-1"
+                      style={{ fontFamily: "'Syne', sans-serif", color: '#5e17eb' }}
+                    >
+                      {bookingRef}
+                    </p>
+                    {totalDays > 0 && (
+                      <p className="text-xs text-gray-400 font-light">
+                        {totalDays} day{totalDays !== 1 ? 's' : ''} submitted
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-gray-500 font-light text-base max-w-md leading-relaxed mb-10">
-                  We've received your planning request. One of our travel architects will reach out within 24 hours to begin crafting your experience.
+                  A confirmation email has been sent to your inbox. One of our travel architects
+                  will reach out within 24 hours to begin crafting your experience.
                 </p>
                 <button
                   type="button"
-                  onClick={() => setFormStatus('idle')}
+                  onClick={() => {
+                    setFormStatus('idle');
+                    setBookingRef('');
+                    setTotalDays(0);
+                    setFormError('');
+                  }}
                   className="text-xs font-bold tracking-[0.25em] uppercase text-[#5e17eb] hover:text-[#1800ad] transition-colors"
                 >
                   Submit Another Request
                 </button>
               </div>
+
             ) : (
+              /* ── FORM ─────────────────────────────────────── */
               <form onSubmit={handleSubmit}>
-                <div className="bg-[#ffffff] relative" style={{ borderTop: '3px solid transparent', backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #5e17eb, #1800ad)', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
-                  {/* Top gradient accent */}
+                <div className="bg-[#ffffff] relative">
                   <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, #5e17eb, #1800ad)' }} />
 
                   <div className="p-8 sm:p-12 lg:p-16 space-y-14">
 
-                    {/* ── SECTION 1: Personal Details ── */}
+                    {/* ── SECTION 1: Your Details ── */}
                     <div>
                       <div className="flex items-center gap-4 mb-10">
                         <div
                           className="w-8 h-8 flex items-center justify-center text-white text-xs font-black"
                           style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', fontFamily: "'Syne', sans-serif" }}
-                        >
-                          1
-                        </div>
+                        >1</div>
                         <h3 className="text-xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
                           Your Details
                         </h3>
@@ -724,11 +757,9 @@ const CustomPlanningPage: React.FC = () => {
                         <div
                           className="w-8 h-8 flex items-center justify-center text-white text-xs font-black"
                           style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', fontFamily: "'Syne', sans-serif" }}
-                        >
-                          2
-                        </div>
+                        >2</div>
                         <h3 className="text-xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
-                          Group & Luggage
+                          Group &amp; Luggage
                         </h3>
                         <div className="flex-1 h-px bg-[#e8e4df]" />
                       </div>
@@ -740,21 +771,17 @@ const CustomPlanningPage: React.FC = () => {
                             Adults<span className="text-[#5e17eb] ml-0.5">*</span>
                           </label>
                           <div className="flex items-center gap-0 border-b border-gray-200 pb-2">
-                            <button
-                              type="button"
+                            <button type="button"
                               onClick={() => setFormData(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
-                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200"
-                            >
+                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M20 12H4" /></svg>
                             </button>
                             <span className="w-14 text-center text-lg font-black text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>
                               {formData.adults}
                             </span>
-                            <button
-                              type="button"
+                            <button type="button"
                               onClick={() => setFormData(p => ({ ...p, adults: p.adults + 1 }))}
-                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200"
-                            >
+                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M12 4v16m8-8H4" /></svg>
                             </button>
                           </div>
@@ -767,21 +794,17 @@ const CustomPlanningPage: React.FC = () => {
                             Children
                           </label>
                           <div className="flex items-center gap-0 border-b border-gray-200 pb-2">
-                            <button
-                              type="button"
+                            <button type="button"
                               onClick={() => setFormData(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
-                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200"
-                            >
+                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M20 12H4" /></svg>
                             </button>
                             <span className="w-14 text-center text-lg font-black text-gray-900" style={{ fontFamily: "'Syne', sans-serif" }}>
                               {formData.children}
                             </span>
-                            <button
-                              type="button"
+                            <button type="button"
                               onClick={() => setFormData(p => ({ ...p, children: p.children + 1 }))}
-                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200"
-                            >
+                              className="w-9 h-9 flex items-center justify-center border border-[#e8e4df] text-gray-500 hover:border-[#5e17eb] hover:text-[#5e17eb] transition-all duration-200">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="square" d="M12 4v16m8-8H4" /></svg>
                             </button>
                           </div>
@@ -818,9 +841,7 @@ const CustomPlanningPage: React.FC = () => {
                         <div
                           className="w-8 h-8 flex items-center justify-center text-white text-xs font-black"
                           style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', fontFamily: "'Syne', sans-serif" }}
-                        >
-                          3
-                        </div>
+                        >3</div>
                         <div>
                           <h3 className="text-xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
                             Day-by-Day Itinerary
@@ -832,10 +853,7 @@ const CustomPlanningPage: React.FC = () => {
                         <div className="flex-1 h-px bg-[#e8e4df]" />
                         <span
                           className="text-xs font-bold tracking-widest uppercase flex-shrink-0"
-                          style={{
-                            color: formData.days.length >= 30 ? '#e8e4df' : '#5e17eb',
-                            fontFamily: "'DM Sans', sans-serif",
-                          }}
+                          style={{ color: formData.days.length >= 30 ? '#e8e4df' : '#5e17eb', fontFamily: "'DM Sans', sans-serif" }}
                         >
                           {formData.days.length} / 30 days
                         </span>
@@ -850,7 +868,7 @@ const CustomPlanningPage: React.FC = () => {
                         </div>
                         <p className="text-xs text-gray-500 font-light leading-relaxed">
                           Fill as many or as few days as you know. Our travel architects will fill the gaps
-                          with secret places and authentic experiences you wouldn't find yourself — including
+                          with secret places and authentic experiences you wouldn&apos;t find yourself — including
                           hidden villages, astrologer visits, private temple ceremonies and more.
                         </p>
                       </div>
@@ -884,15 +902,13 @@ const CustomPlanningPage: React.FC = () => {
                       )}
                     </div>
 
-                    {/* ── SECTION 4: Additional Notes ── */}
+                    {/* ── SECTION 4: Final Notes ── */}
                     <div>
                       <div className="flex items-center gap-4 mb-10">
                         <div
                           className="w-8 h-8 flex items-center justify-center text-white text-xs font-black"
                           style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', fontFamily: "'Syne', sans-serif" }}
-                        >
-                          4
-                        </div>
+                        >4</div>
                         <h3 className="text-xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
                           Final Notes
                         </h3>
@@ -909,6 +925,16 @@ const CustomPlanningPage: React.FC = () => {
                         />
                       </FormField>
                     </div>
+
+                    {/* ── Error message ── */}
+                    {formError && (
+                      <div
+                        className="px-5 py-4 border-l-4 text-sm font-light text-red-700"
+                        style={{ background: '#fff5f5', borderColor: '#e53e3e' }}
+                      >
+                        {formError}
+                      </div>
+                    )}
 
                     {/* ── SUBMIT ── */}
                     <div className="pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-[#e8e4df]">
@@ -954,9 +980,6 @@ const CustomPlanningPage: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* ── TRUST CLOSING STRIP ───────────── */}
-        
 
       </main>
 

@@ -63,26 +63,26 @@ const FormField: React.FC<{ label: string; required?: boolean; children: React.R
   </div>
 );
 
-const InputBase = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light placeholder-gray-300 focus:outline-none focus:border-transparent transition-all";
+const InputBase  = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light placeholder-gray-300 focus:outline-none focus:border-transparent transition-all";
 const SelectBase = "w-full bg-transparent border-b border-gray-200 py-2.5 text-gray-900 text-sm font-light focus:outline-none focus:border-transparent transition-all appearance-none cursor-pointer";
 
 // ─────────────────────────────────────────────
-// Tour Data (single tour — in production, fetch by slug)
+// Tour Data
 // ─────────────────────────────────────────────
 const tourData = {
-  id: 'rt1',
-  slug: 'cultural-triangle-explorer',
-  category: 'Round Tour',
-  title: 'Cultural Triangle Explorer',
-  tagline: 'Ancient kingdoms, sacred temples & timeless landscapes in one seamless arc.',
-  badge: 'Most Popular',
-  heroImage: '../blogimg/sigiriya.avif',
-  duration: '7 Days / 6 Nights',
-  groupSize: '2–12 People',
-  difficulty: 'Easy',
+  id:             'rt1',
+  slug:           'cultural-triangle-explorer',
+  category:       'Round Tour',
+  title:          'Cultural Triangle Explorer',
+  tagline:        'Ancient kingdoms, sacred temples & timeless landscapes in one seamless arc.',
+  badge:          'Most Popular',
+  heroImage:      '../blogimg/sigiriya.avif',
+  duration:       '7 Days / 6 Nights',
+  groupSize:      '2–12 People',
+  difficulty:     'Easy',
   departurePoint: 'Colombo or Negombo',
-  price: 'From $1,240',
-  priceNote: 'per person, twin share basis',
+  price:          'From $1,240',
+  priceNote:      'per person, twin share basis',
   overview: `The Cultural Triangle is Sri Lanka's crown jewel — a triangle of ancient cities that ruled the island for over two millennia. This seven-day journey traces that story from the ground up. You will stand inside a 5th-century fortress at dawn, walk the ruins of a city that once housed a million people and watch a full moon rise over a stupa built before the birth of Christ.
 
 Every day is designed with intention. We move at your pace. Mornings belong to the ruins, middays to the villages and afternoons to the stories that connect them. Evenings are yours — whether that means sitting on a verandah with a cold lion lager, or meeting the astrologer our guests have been visiting for eleven years.`,
@@ -164,27 +164,27 @@ Every day is designed with intention. We move at your pace. Mornings belong to t
   ],
   relatedTours: [
     {
-      slug: 'hill-country-immersion',
-      title: 'Hill Country Immersion',
-      image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80',
+      slug:     'hill-country-immersion',
+      title:    'Hill Country Immersion',
+      image:    'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80',
       duration: '8 Days',
-      price: 'From $1,560',
+      price:    'From $1,560',
       category: 'Round Tour',
     },
     {
-      slug: 'southern-coast-grand-tour',
-      title: 'Southern Coast Grand Tour',
-      image: 'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=600&q=80',
+      slug:     'southern-coast-grand-tour',
+      title:    'Southern Coast Grand Tour',
+      image:    'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=600&q=80',
       duration: '10 Days',
-      price: 'From $1,890',
+      price:    'From $1,890',
       category: 'Round Tour',
     },
     {
-      slug: 'sigiriya-dawn-ritual',
-      title: 'Sigiriya Dawn Ritual',
-      image: 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=900&q=85',
+      slug:     'sigiriya-dawn-ritual',
+      title:    'Sigiriya Dawn Ritual',
+      image:    'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=900&q=85',
       duration: '1 Day',
-      price: 'From $180',
+      price:    'From $180',
       category: 'Experience Tour',
     },
   ],
@@ -194,22 +194,73 @@ Every day is designed with intention. We move at your pace. Mornings belong to t
 // Main Tour View Page
 // ─────────────────────────────────────────────
 const TourViewPage: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen,       setIsMenuOpen]       = useState(false);
   const [activeGalleryImg, setActiveGalleryImg] = useState(0);
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'includes'>('overview');
+  const [formStatus,       setFormStatus]       = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [adults,           setAdults]           = useState(1);
+  const [children,         setChildren]         = useState(0);
+  const [activeTab,        setActiveTab]        = useState<'overview' | 'itinerary' | 'includes'>('overview');
 
-  const heroRef = useInView(0.1);
+  // ── NEW state for live API integration ──────────────────────
+  const [bookingRef,  setBookingRef]  = useState<string>('');
+  const [formError,   setFormError]   = useState<string>('');
+
+  const heroRef    = useInView(0.1);
   const contentRef = useInView(0.05);
-  const formRef = useInView(0.08);
+  const formRef    = useInView(0.08);
   const relatedRef = useInView(0.1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ── LIVE handleSubmit — replaces the old setTimeout mock ────
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormStatus('submitting');
-    setTimeout(() => setFormStatus('success'), 2000);
+    setFormError('');
+
+    const form     = e.currentTarget;
+    const formData = new FormData(form);
+
+    const payload = {
+      salutation:         formData.get('salutation')        as string,
+      fullName:           formData.get('fullName')           as string,
+      email:              formData.get('email')              as string,
+      phone:              formData.get('phone')              as string,
+      preferredContact:   formData.get('preferredContact')   as string,
+      tourName:           formData.get('tourName')           as string,
+      // Metadata sent alongside selected tour name
+      tourSlug:           tourData.slug,
+      tourCategory:       tourData.category,
+      tourDuration:       tourData.duration,
+      tourPriceDisplay:   tourData.price,
+      pickupLocation:     formData.get('pickupLocation')     as string,
+      preferredStartDate: formData.get('preferredStartDate') as string,
+      adults,
+      children,
+      luggageType:        formData.get('luggageType')        as string,
+      additionalNotes:    formData.get('additionalNotes')    as string,
+    };
+
+    try {
+      const res  = await fetch('/api/tour-booking', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFormError(data.error || 'Something went wrong. Please try again.');
+        setFormStatus('idle');
+        return;
+      }
+
+      setBookingRef(data.bookingReference);
+      setFormStatus('success');
+
+    } catch {
+      setFormError('Network error. Please check your connection and try again.');
+      setFormStatus('idle');
+    }
   };
 
   return (
@@ -310,9 +361,9 @@ const TourViewPage: React.FC = () => {
         <div className="bg-[#0d0d0d] px-6 sm:px-12 lg:px-20 py-5">
           <div className="max-w-[1400px] mx-auto grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.07]">
             {[
-              { label: 'Duration', value: tourData.duration },
-              { label: 'Group Size', value: tourData.groupSize },
-              { label: 'Difficulty', value: tourData.difficulty },
+              { label: 'Duration',    value: tourData.duration },
+              { label: 'Group Size',  value: tourData.groupSize },
+              { label: 'Difficulty',  value: tourData.difficulty },
               { label: 'Starts From', value: tourData.departurePoint },
             ].map((s, i) => (
               <div key={i} className="px-5 lg:px-8 first:pl-0 last:pr-0">
@@ -335,9 +386,9 @@ const TourViewPage: React.FC = () => {
               {/* Tab nav */}
               <div className="flex items-center gap-0 border-b border-[#e8e4df] mb-10">
                 {([
-                  { key: 'overview', label: 'Overview' },
+                  { key: 'overview',  label: 'Overview'  },
                   { key: 'itinerary', label: 'Itinerary' },
-                  { key: 'includes', label: 'Includes' },
+                  { key: 'includes',  label: 'Includes'  },
                 ] as const).map(tab => (
                   <button
                     key={tab.key}
@@ -358,7 +409,6 @@ const TourViewPage: React.FC = () => {
               {/* Overview Tab */}
               {activeTab === 'overview' && (
                 <div className="space-y-10">
-                  {/* Overview text */}
                   <div className="space-y-5">
                     {tourData.overview.split('\n\n').map((para, i) => (
                       <p key={i} className="text-gray-600 text-base leading-[1.85] font-light" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -433,24 +483,16 @@ const TourViewPage: React.FC = () => {
               {activeTab === 'itinerary' && (
                 <div className="space-y-0">
                   {tourData.itinerary.map((day, i) => (
-                    <div
-                      key={day.day}
-                      className="group relative flex gap-6 pb-10"
-                    >
-                      {/* Timeline line */}
+                    <div key={day.day} className="group relative flex gap-6 pb-10">
                       {i < tourData.itinerary.length - 1 && (
                         <div className="absolute left-[19px] top-12 bottom-0 w-px bg-[#e8e4df]" />
                       )}
-
-                      {/* Day badge */}
                       <div
                         className="w-10 h-10 flex-shrink-0 flex items-center justify-center text-white text-xs font-black mt-1 transition-transform duration-300 group-hover:scale-105"
                         style={{ background: 'linear-gradient(135deg, #5e17eb, #1800ad)', fontFamily: "'Syne', sans-serif" }}
                       >
                         {String(day.day).padStart(2, '0')}
                       </div>
-
-                      {/* Content */}
                       <div className="flex-1 pt-1 pb-6 border-b border-[#e8e4df] last:border-0">
                         <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#5e17eb] mb-1" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                           Day {day.day}
@@ -479,12 +521,11 @@ const TourViewPage: React.FC = () => {
               {/* Includes Tab */}
               {activeTab === 'includes' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-                  {/* Includes */}
                   <div>
                     <div className="flex items-center gap-4 mb-7">
                       <div className="w-1 h-8 bg-[#5e17eb]" />
                       <h3 className="text-sm font-bold tracking-[0.25em] uppercase text-[#5e17eb]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                        What's Included
+                        What&apos;s Included
                       </h3>
                     </div>
                     <ul className="space-y-3">
@@ -503,8 +544,6 @@ const TourViewPage: React.FC = () => {
                       ))}
                     </ul>
                   </div>
-
-                  {/* Excludes */}
                   <div>
                     <div className="flex items-center gap-4 mb-7">
                       <div className="w-1 h-8 bg-gray-300" />
@@ -551,7 +590,7 @@ const TourViewPage: React.FC = () => {
                     <p className="text-xs text-gray-400 font-light mt-1">{tourData.priceNote}</p>
                   </div>
 
-                  {/* Form */}
+                  {/* ── SUCCESS STATE ─────────────────── */}
                   {formStatus === 'success' ? (
                     <div className="text-center py-8">
                       <div
@@ -566,25 +605,45 @@ const TourViewPage: React.FC = () => {
                       <h3 className="text-xl font-black text-gray-900 mb-3" style={{ fontFamily: "'Syne', sans-serif" }}>
                         Booking Received.
                       </h3>
+                      {/* Booking reference display */}
+                      {bookingRef && (
+                        <div
+                          className="mb-6 px-5 py-4 border-l-4 text-left"
+                          style={{ background: '#f8f6ff', borderColor: '#5e17eb' }}
+                        >
+                          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-1">
+                            Your Booking Reference
+                          </p>
+                          <p
+                            className="text-lg font-black tracking-widest"
+                            style={{ fontFamily: "'Syne', sans-serif", color: '#5e17eb' }}
+                          >
+                            {bookingRef}
+                          </p>
+                        </div>
+                      )}
                       <p className="text-sm text-gray-500 font-light leading-relaxed mb-6">
-                        We'll contact you within 24 hours to confirm your booking and arrange payment.
+                        A confirmation email has been sent to your inbox. Our travel architect
+                        will contact you within 24 hours to confirm your journey.
                       </p>
                       <button
                         type="button"
-                        onClick={() => setFormStatus('idle')}
+                        onClick={() => { setFormStatus('idle'); setBookingRef(''); setFormError(''); }}
                         className="text-xs font-bold tracking-widest uppercase text-[#5e17eb] hover:text-[#1800ad] transition-colors"
                       >
                         Book Another Tour
                       </button>
                     </div>
+
                   ) : (
+                    /* ── FORM ─────────────────────────────── */
                     <form onSubmit={handleSubmit} className="space-y-6">
 
                       {/* Salutation + Name */}
                       <div className="grid grid-cols-[80px_1fr] gap-4">
                         <FormField label="Title" required>
                           <div className="relative">
-                            <select className={SelectBase} required defaultValue="">
+                            <select name="salutation" className={SelectBase} required defaultValue="">
                               <option value="" disabled>—</option>
                               <option>Mr.</option>
                               <option>Ms.</option>
@@ -597,24 +656,24 @@ const TourViewPage: React.FC = () => {
                           </div>
                         </FormField>
                         <FormField label="Full Name" required>
-                          <input type="text" className={InputBase} placeholder="John Doe" required />
+                          <input name="fullName" type="text" className={InputBase} placeholder="John Doe" required />
                         </FormField>
                       </div>
 
                       {/* Email */}
                       <FormField label="Email Address" required>
-                        <input type="email" className={InputBase} placeholder="your@email.com" required />
+                        <input name="email" type="email" className={InputBase} placeholder="your@email.com" required />
                       </FormField>
 
                       {/* Phone */}
                       <FormField label="Phone / WhatsApp" required>
-                        <input type="tel" className={InputBase} placeholder="+1 234 567 890" required />
+                        <input name="phone" type="tel" className={InputBase} placeholder="+1 234 567 890" required />
                       </FormField>
 
                       {/* Contact method */}
                       <FormField label="Preferred Contact" required>
                         <div className="relative">
-                          <select className={SelectBase} required defaultValue="">
+                          <select name="preferredContact" className={SelectBase} required defaultValue="">
                             <option value="" disabled>Select method</option>
                             <option>Email</option>
                             <option>WhatsApp</option>
@@ -629,7 +688,7 @@ const TourViewPage: React.FC = () => {
                       {/* Select Tour */}
                       <FormField label="Select Tour" required>
                         <div className="relative">
-                          <select className={SelectBase} required defaultValue={tourData.title}>
+                          <select name="tourName" className={SelectBase} required defaultValue={tourData.title}>
                             <option>{tourData.title}</option>
                             <option>Southern Coast Grand Tour</option>
                             <option>Hill Country Immersion</option>
@@ -643,7 +702,12 @@ const TourViewPage: React.FC = () => {
 
                       {/* Pickup */}
                       <FormField label="Pickup Location" required>
-                        <input type="text" className={InputBase} placeholder="e.g. Colombo Airport, Hotel…" required />
+                        <input name="pickupLocation" type="text" className={InputBase} placeholder="e.g. Colombo Airport, Hotel…" required />
+                      </FormField>
+
+                      {/* Preferred Start Date */}
+                      <FormField label="Preferred Start Date">
+                        <input name="preferredStartDate" type="date" className={InputBase} />
                       </FormField>
 
                       {/* Group size */}
@@ -684,7 +748,7 @@ const TourViewPage: React.FC = () => {
                       {/* Luggage */}
                       <FormField label="Luggage">
                         <div className="relative">
-                          <select className={SelectBase} defaultValue="">
+                          <select name="luggageType" className={SelectBase} defaultValue="">
                             <option value="" disabled>Select type</option>
                             <option>Light — backpacks only</option>
                             <option>Standard — checked luggage</option>
@@ -699,11 +763,22 @@ const TourViewPage: React.FC = () => {
                       {/* Additional notes */}
                       <FormField label="Additional Notes">
                         <textarea
+                          name="additionalNotes"
                           className={`${InputBase} resize-none`}
                           rows={3}
                           placeholder="Dietary requirements, special occasions, specific interests…"
                         />
                       </FormField>
+
+                      {/* Error message */}
+                      {formError && (
+                        <div
+                          className="px-5 py-4 border-l-4 text-sm font-light text-red-700"
+                          style={{ background: '#fff5f5', borderColor: '#e53e3e' }}
+                        >
+                          {formError}
+                        </div>
+                      )}
 
                       {/* Submit */}
                       <div className="pt-2">
@@ -714,16 +789,26 @@ const TourViewPage: React.FC = () => {
                         >
                           <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105" style={{ background: 'linear-gradient(135deg, #5e17eb 0%, #1800ad 100%)' }} />
                           <span className="relative z-10 flex items-center gap-3">
-                            {formStatus === 'submitting' ? 'Sending…' : 'Book This Tour'}
-                            {formStatus !== 'submitting' && (
-                              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
-                              </svg>
+                            {formStatus === 'submitting' ? (
+                              <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4} />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                                Sending…
+                              </>
+                            ) : (
+                              <>
+                                Book This Tour
+                                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                  <path strokeLinecap="square" strokeLinejoin="miter" d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                              </>
                             )}
                           </span>
                         </button>
                         <p className="text-[9px] text-gray-400 font-light text-center mt-3 leading-relaxed">
-                          No payment required now. We'll contact you to confirm availability.
+                          No payment required now. We&apos;ll contact you to confirm availability.
                         </p>
                       </div>
                     </form>
@@ -754,8 +839,8 @@ const TourViewPage: React.FC = () => {
                   href={`/tours/${related.slug}`}
                   className="group block"
                   style={{
-                    opacity: relatedRef.inView ? 1 : 0,
-                    transform: relatedRef.inView ? 'translateY(0)' : 'translateY(24px)',
+                    opacity:    relatedRef.inView ? 1 : 0,
+                    transform:  relatedRef.inView ? 'translateY(0)' : 'translateY(24px)',
                     transition: `opacity 0.6s ease ${i * 120}ms, transform 0.6s ease ${i * 120}ms`,
                   }}
                 >
@@ -763,7 +848,7 @@ const TourViewPage: React.FC = () => {
                     <img
                       src={related.image}
                       alt={related.title}
-                      className="w-full h-full object-cover transition-transform duration-[1800ms] ease-out group-hover:scale-106"
+                      className="w-full h-full object-cover transition-transform duration-[1800ms] ease-out group-hover:scale-105"
                     />
                   </div>
                   <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-[#5e17eb] block mb-2">

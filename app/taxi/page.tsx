@@ -196,6 +196,8 @@ const TaxiPage: React.FC = () => {
   const [children, setChildren] = useState(0);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const [activeVehicle, setActiveVehicle] = useState(0);
+  const [bookingRef, setBookingRef] = useState<string>('');
+  const [formError, setFormError] = useState<string>('');
 
   const heroRef = useInView(0.1);
   const trustRef = useInView(0.1);
@@ -205,10 +207,51 @@ const TaxiPage: React.FC = () => {
   const formRef = useInView(0.06);
   const ctaRef = useInView(0.1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormStatus('submitting');
-    setTimeout(() => setFormStatus('success'), 2000);
+    setFormError('');
+
+    const form     = e.currentTarget;
+    const formData = new FormData(form);
+
+    const payload = {
+      salutation:        formData.get('salutation')        as string,
+      fullName:          formData.get('fullName')           as string,
+      email:             formData.get('email')              as string,
+      phone:             formData.get('phone')              as string,
+      preferredContact:  formData.get('preferredContact')   as string,
+      vehiclePreference: formData.get('vehiclePreference')  as string,
+      pickupLocation:    formData.get('pickupLocation')     as string,
+      pickupDatetime:    formData.get('pickupDatetime')     as string,
+      destination:       formData.get('destination')        as string,
+      adults,
+      children,
+      luggageType:       formData.get('luggageType')        as string,
+      additionalNotes:   formData.get('additionalNotes')    as string,
+    };
+
+    try {
+      const res = await fetch('/api/taxi-booking', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFormError(data.error || 'Something went wrong. Please try again.');
+        setFormStatus('idle');
+        return;
+      }
+
+      setBookingRef(data.bookingReference);
+      setFormStatus('success');
+    } catch {
+      setFormError('Network error. Please check your connection and try again.');
+      setFormStatus('idle');
+    }
   };
 
   return (
@@ -383,12 +426,26 @@ const TaxiPage: React.FC = () => {
                       <h3 className="text-3xl font-black text-gray-900 tracking-tight mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
                         Booking Confirmed.
                       </h3>
+                      {bookingRef && (
+                        <div
+                          className="mb-6 px-6 py-4 border-l-4"
+                          style={{ background: '#f4f4f4', borderColor: '#5e17eb' }}
+                        >
+                          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-1">
+                            Your Booking Reference
+                          </p>
+                          <p className="text-xl font-black tracking-widest" style={{ fontFamily: "'Syne', sans-serif", color: '#5e17eb' }}>
+                            {bookingRef}
+                          </p>
+                        </div>
+                      )}
                       <p className="text-gray-500 font-light max-w-sm leading-relaxed mb-8">
-                        Your transfer request has been received. We will confirm your booking and share driver details within 1 hour.
+                        Your transfer request has been saved. A confirmation email has been sent to your inbox.
+                        We will confirm your driver details within one hour.
                       </p>
                       <button
                         type="button"
-                        onClick={() => setFormStatus('idle')}
+                        onClick={() => { setFormStatus('idle'); setBookingRef(''); setFormError(''); }}
                         className="text-xs font-bold tracking-widest uppercase text-[#5e17eb] hover:text-[#1800ad] transition-colors"
                       >
                         Book Another Transfer
@@ -401,7 +458,7 @@ const TaxiPage: React.FC = () => {
                         <div className="col-span-2">
                           <FormField label="Title" required>
                             <div className="relative">
-                              <select className={SelectBase} required defaultValue="">
+                              <select name="salutation" className={SelectBase} required defaultValue="">
                                 <option value="" disabled>—</option>
                                 <option>Mr.</option>
                                 <option>Ms.</option>
@@ -417,24 +474,24 @@ const TaxiPage: React.FC = () => {
                         </div>
                         <div className="col-span-10">
                           <FormField label="Full Name" required>
-                            <input type="text" className={InputBase} placeholder="Your full name" required />
+                            <input type="text" name="fullName" className={InputBase} placeholder="Your full name" required />
                           </FormField>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <FormField label="Email Address" required>
-                          <input type="email" className={InputBase} placeholder="your@email.com" required />
+                          <input type="email" name="email" className={InputBase} placeholder="your@email.com" required />
                         </FormField>
                         <FormField label="Phone / WhatsApp" required>
-                          <input type="tel" className={InputBase} placeholder="+94 77 123 4567" required />
+                          <input type="tel" name="phone" className={InputBase} placeholder="+94 77 123 4567" required />
                         </FormField>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <FormField label="Preferred Contact" required>
                           <div className="relative">
-                            <select className={SelectBase} required defaultValue="">
+                            <select name="preferredContact" className={SelectBase} required defaultValue="">
                               <option value="" disabled>Select method</option>
                               <option>Email</option>
                               <option>WhatsApp</option>
@@ -447,7 +504,7 @@ const TaxiPage: React.FC = () => {
                         </FormField>
                         <FormField label="Vehicle Preference">
                           <div className="relative">
-                            <select className={SelectBase} defaultValue="">
+                            <select name="vehiclePreference" className={SelectBase} defaultValue="">
                               <option value="" disabled>Select vehicle</option>
                               <option>Executive Sedan</option>
                               <option>Premium SUV</option>
@@ -463,15 +520,15 @@ const TaxiPage: React.FC = () => {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <FormField label="Pickup Location" required>
-                          <input type="text" className={InputBase} placeholder="e.g. Colombo Airport, Terminal 1…" required />
+                          <input type="text" name="pickupLocation" className={InputBase} placeholder="e.g. Colombo Airport, Terminal 1…" required />
                         </FormField>
                         <FormField label="Pickup Date & Time" required>
-                          <input type="datetime-local" className={InputBase} required />
+                          <input type="datetime-local" name="pickupDatetime" className={InputBase} required />
                         </FormField>
                       </div>
 
                       <FormField label="Arrival / Destination" required>
-                        <input type="text" className={InputBase} placeholder="e.g. Sigiriya Rock View Hotel, Kandy…" required />
+                        <input type="text" name="destination" className={InputBase} placeholder="e.g. Sigiriya Rock View Hotel, Kandy…" required />
                       </FormField>
 
                       {/* Group size */}
@@ -513,7 +570,7 @@ const TaxiPage: React.FC = () => {
 
                       <FormField label="Luggage">
                         <div className="relative">
-                          <select className={SelectBase} defaultValue="">
+                          <select name="luggageType" className={SelectBase} defaultValue="">
                             <option value="" disabled>Select luggage type</option>
                             <option>Light — carry-on bags only</option>
                             <option>Standard — 1–2 checked bags</option>
@@ -528,11 +585,21 @@ const TaxiPage: React.FC = () => {
 
                       <FormField label="Additional Notes">
                         <textarea
+                          name="additionalNotes"
                           className={`${InputBase} resize-none`}
                           rows={4}
                           placeholder="Flight number, special requirements, preferred route, child seat needed, meet & greet sign, language preference…"
                         />
                       </FormField>
+
+                      {formError && (
+                        <div
+                          className="mb-6 px-5 py-4 border-l-4 text-sm font-light text-red-700"
+                          style={{ background: '#fff5f5', borderColor: '#e53e3e' }}
+                        >
+                          {formError}
+                        </div>
+                      )}
 
                       <div className="pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-[#e8e4df]">
                         <p className="text-xs text-gray-400 font-light leading-relaxed max-w-xs">
@@ -957,8 +1024,6 @@ const TaxiPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-       
 
         {/* ── CTA STRIP ─────────────────────── */}
         <div

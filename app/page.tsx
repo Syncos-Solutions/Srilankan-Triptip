@@ -9,6 +9,7 @@ import FooterSection from "@/components/Footer";
 import CustomPlanningSection from "@/components/CurrentProgramsSection";
 import AdventureHero from "@/components/AdventureHero";
 import TestimonialsSection from "@/components/Testimonialssection";
+
 //import StatsHighlightSection from "@/components/StatsStrip";
 //import TourPreparationSection from "@/components/FeatureTile";
 
@@ -21,6 +22,7 @@ export default function Home() {
       {/* <StatsHighlightSection /> */}
       
       <Aboutsection />
+      
       <CustomPlanningSection />
       <TestimonialsSection />
       

@@ -1,5 +1,5 @@
 module.exports = {
-    siteUrl: 'https://mihithlankatours.com',
+    siteUrl: 'https://striplankantriptip.com',
     generateRobotsTxt: true, // Optional
     changefreq: 'daily', // Choose an appropriate frequency
     priority: 0.7, // Priority for SEO
