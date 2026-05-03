@@ -1,71 +1,33 @@
-// ============================================================
 // lib/supabase-client.ts — Sri Lankan TripTip
-//
-// Public (anon-key) Supabase client for website-side reads.
-// Safe to use client-side — only exposes what RLS allows.
-//
-// Rules enforced by RLS on blog_posts:
-//   - Anon users: can only SELECT where status = 'published'
-//   - Anon users: cannot INSERT, UPDATE, or DELETE
-//   - Only the admin panel (authenticated) can write
-//
-// This client is used by:
-//   - app/blog/page.tsx          (list all published posts)
-//   - app/blog/[slug]/page.tsx   (fetch single post by slug)
-//   - increment_blog_view_count  (RPC call on post view)
-// ============================================================
+// Public (anon-key) Supabase client.
+// Uses @supabase/supabase-js — NOT @supabase/ssr.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// ── Singleton pattern — reuse one client instance ─────────────
 let _client: SupabaseClient | null = null;
 
 export function createPublicClient(): SupabaseClient {
   if (_client) return _client;
-
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      'Missing Supabase public environment variables. ' +
-      'Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local'
-    );
-  }
-
-  _client = createClient(url, key, {
-    auth: {
-      // No auth needed for public reads — suppress session persistence
-      autoRefreshToken: false,
-      persistSession:   false,
-    },
-  });
-
+  if (!url || !key) throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  _client = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
   return _client;
 }
 
-// ── Type Definitions ──────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────
 
 export interface ContentBlock {
   type:
-    | 'lead_paragraph'
-    | 'paragraph'
-    | 'heading'
-    | 'subheading'
-    | 'pull_quote'
-    | 'image'
-    | 'image_gallery'
-    | 'tips_list'
-    | 'divider';
-  // For text blocks
+    | 'lead_paragraph' | 'paragraph' | 'heading' | 'subheading'
+    | 'pull_quote' | 'image' | 'image_gallery' | 'tips_list' | 'divider';
   text?:    string;
-  // For image block
   src?:     string;
   alt?:     string;
   caption?: string;
-  // For image_gallery block
   images?:  { src: string; alt: string; caption?: string }[];
-  // For tips_list block
   heading?: string;
   items?:   string[];
 }
@@ -104,126 +66,120 @@ export interface BlogPost {
   view_count:       number;
 }
 
-// ── Convenience type for blog listing cards ───────────────────
 export type BlogPostCard = Pick<
   BlogPost,
-  | 'id'
-  | 'slug'
-  | 'category'
-  | 'title'
-  | 'excerpt'
-  | 'hero_image'
-  | 'hero_image_alt'
-  | 'author'
-  | 'author_role'
-  | 'author_initials'
-  | 'read_time'
-  | 'published_at'
-  | 'featured'
-  | 'tags'
+  | 'id' | 'slug' | 'category' | 'title' | 'subtitle' | 'excerpt'
+  | 'hero_image' | 'hero_image_alt' | 'author' | 'author_role'
+  | 'author_initials' | 'read_time' | 'published_at' | 'featured' | 'tags'
 >;
 
-// ── Query helpers ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
 
 /**
- * Fetch all published posts for the blog listing page.
- * Returns lightweight card data only — no body_content (saves bandwidth).
+ * Normalise a raw DB row into a BlogPost.
+ * Handles the case where body_content / gallery_images come back
+ * as a JSON string (TEXT column) instead of a parsed array.
  */
-export async function getPublishedPosts(): Promise<BlogPostCard[]> {
-  const supabase = createPublicClient();
+function normalisePost(raw: Record<string, unknown>): BlogPost {
+  const parseJsonField = (val: unknown): unknown[] => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string' && val.length > 0) {
+      try { const p = JSON.parse(val); return Array.isArray(p) ? p : []; }
+      catch { return []; }
+    }
+    return [];
+  };
 
-  const { data, error } = await supabase
+  return {
+    ...raw,
+    body_content:   parseJsonField(raw.body_content)  as ContentBlock[],
+    gallery_images: parseJsonField(raw.gallery_images) as GalleryImage[],
+    tags:           Array.isArray(raw.tags)  ? (raw.tags as string[]) : [],
+    related_slugs:  Array.isArray(raw.related_slugs) ? (raw.related_slugs as string[]) : [],
+  } as BlogPost;
+}
+
+// ─────────────────────────────────────────────────────────────
+// QUERIES
+// ─────────────────────────────────────────────────────────────
+
+export async function getPublishedPosts(): Promise<BlogPostCard[]> {
+  const sb = createPublicClient();
+  const { data, error } = await sb
     .from('blog_posts')
-    .select(`
-      id, slug, category, title, excerpt,
-      hero_image, hero_image_alt,
-      author, author_role, author_initials,
-      read_time, published_at, featured, tags
-    `)
+    .select('id,slug,category,title,subtitle,excerpt,hero_image,hero_image_alt,author,author_role,author_initials,read_time,published_at,featured,tags')
     .eq('status', 'published')
     .order('published_at', { ascending: false });
-
-  if (error) {
-    console.error('[Blog] Failed to fetch posts:', error.message);
-    return [];
-  }
-
+  if (error) { console.error('[Blog] getPublishedPosts:', error.message); return []; }
   return (data ?? []) as BlogPostCard[];
 }
 
 /**
- * Fetch a single published post by slug for the view page.
- * Returns full post including body_content and gallery_images.
+ * Fetch by SLUG — used by public blog view page.
+ * No status filter here — preview works for drafts too.
  */
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
-  const supabase = createPublicClient();
+  if (!slug) return null;
+  const sb = createPublicClient();
 
-  const { data, error } = await supabase
+  // ── Try slug match first ───────────────────────────────────
+  const { data: bySlug, error: slugErr } = await sb
     .from('blog_posts')
     .select('*')
     .eq('slug', slug)
-    .eq('status', 'published')
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    if (error.code !== 'PGRST116') { // PGRST116 = row not found
-      console.error('[Blog] Failed to fetch post:', error.message);
-    }
-    return null;
+  if (slugErr && slugErr.code !== 'PGRST116') {
+    console.error('[Blog] getPostBySlug (slug):', slugErr.message);
   }
 
-  return data as BlogPost;
+  if (bySlug) return normalisePost(bySlug as Record<string, unknown>);
+
+  // ── Fallback: try matching the slug as a UUID (id field) ───
+  // This handles the case where the admin panel redirects to /blog/{id}
+  // instead of /blog/{slug} after creating a post.
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(slug)) {
+    const { data: byId, error: idErr } = await sb
+      .from('blog_posts')
+      .select('*')
+      .eq('id', slug)
+      .maybeSingle();
+
+    if (idErr && idErr.code !== 'PGRST116') {
+      console.error('[Blog] getPostBySlug (id):', idErr.message);
+    }
+
+    if (byId) return normalisePost(byId as Record<string, unknown>);
+  }
+
+  return null;
 }
 
-/**
- * Fetch related posts by their slugs.
- * Used at the bottom of the blog view page.
- */
 export async function getRelatedPosts(slugs: string[]): Promise<BlogPostCard[]> {
-  if (!slugs || slugs.length === 0) return [];
-
-  const supabase = createPublicClient();
-
-  const { data, error } = await supabase
+  if (!slugs?.length) return [];
+  const sb = createPublicClient();
+  const { data, error } = await sb
     .from('blog_posts')
-    .select(`
-      id, slug, category, title, excerpt,
-      hero_image, hero_image_alt,
-      author, author_role, author_initials,
-      read_time, published_at, featured, tags
-    `)
+    .select('id,slug,category,title,subtitle,excerpt,hero_image,hero_image_alt,author,author_role,author_initials,read_time,published_at,featured,tags')
     .in('slug', slugs)
     .eq('status', 'published')
     .limit(3);
-
-  if (error) {
-    console.error('[Blog] Failed to fetch related posts:', error.message);
-    return [];
-  }
-
+  if (error) { console.error('[Blog] getRelatedPosts:', error.message); return []; }
   return (data ?? []) as BlogPostCard[];
 }
 
-/**
- * Increment view count for a post.
- * Uses a Supabase RPC function (defined in blog_posts.sql)
- * so anon users cannot arbitrarily UPDATE the table.
- */
 export async function incrementViewCount(slug: string): Promise<void> {
-  const supabase = createPublicClient();
-  // Fire-and-forget — don't await, don't block the page
-  supabase.rpc('increment_blog_view_count', { post_slug: slug }).then(() => {});
+  if (!slug) return;
+  const sb = createPublicClient();
+  sb.rpc('increment_blog_view_count', { post_slug: slug }).then(() => {});
 }
 
-/**
- * Format published_at date for display.
- * e.g. "Mar 18, 2025"
- */
-export function formatBlogDate(dateStr: string | null): string {
+export function formatBlogDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day:   'numeric',
-    year:  'numeric',
-  });
+  try {
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch { return ''; }
 }
