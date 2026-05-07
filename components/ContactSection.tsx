@@ -33,7 +33,7 @@ const useInView = (threshold = 0.1) => {
 const contactMethods = [
   {
     label: 'Call Us',
-    value: '+94 77 123 4567',
+    value: '+94 76 159 5647',
     sub: 'Available 24/7 for Taxi & Urgent Inquiries',
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -43,7 +43,7 @@ const contactMethods = [
   },
   {
     label: 'Email',
-    value: 'journeys@triptip.lk',
+    value: 'info@srilankantriptip.com',
     sub: 'For bespoke tour planning & general queries',
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -53,8 +53,8 @@ const contactMethods = [
   },
   {
     label: 'Headquarters',
-    value: 'Colombo, Sri Lanka',
-    sub: '145 Galle Road, Colombo 03',
+    value: 'Matara, Sri Lanka',
+    sub: 'madiha, matara 81000',
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="square" strokeLinejoin="miter" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -174,13 +174,13 @@ const ContactSection: React.FC = () => {
                     {method.icon}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400 mb-1">
+                    <h4 className="text-xs font-dm-sans font-bold tracking-[0.2em] uppercase text-gray-400 mb-1">
                       {method.label}
                     </h4>
-                    <p className="text-xl font-bold text-gray-900 mb-1 tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
+                    <p className="text-xl font-dm-sans text-gray-900 mb-1 tracking-tight" >
                       {method.value}
                     </p>
-                    <p className="text-sm text-gray-500 font-light">{method.sub}</p>
+                    <p className="text-sm text-gray-500 font-dm-sans">{method.sub}</p>
                   </div>
                 </div>
               ))}
@@ -192,7 +192,7 @@ const ContactSection: React.FC = () => {
             }`}>
               <span className="text-xs font-bold tracking-[0.2em] uppercase text-gray-900">Follow Us</span>
               {['Instagram', 'Facebook', 'TripAdvisor'].map((social) => (
-                <a key={social} href="#" className="text-sm text-gray-500 hover:text-[#5e17eb] transition-colors duration-300 relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-px after:bg-[#5e17eb] hover:after:w-full after:transition-all after:duration-300">
+                <a key={social} href="https://www.instagram.com/srilankan_triptip/" className="text-sm text-gray-500 hover:text-[#5e17eb] transition-colors duration-300 relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-px after:bg-[#5e17eb] hover:after:w-full after:transition-all after:duration-300">
                   {social}
                 </a>
               ))}
@@ -329,7 +329,7 @@ const ContactSection: React.FC = () => {
       {/* ── REDESIGNED EDITORIAL CLOSING BAND ────── */}
       <div 
         ref={closingRef.ref as React.RefObject<HTMLDivElement>}
-        className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-20 py-24 lg:py-40 overflow-hidden"
+        className="bg-[#e8e4df] px-6 sm:px-10 lg:px-20 py-24 lg:py-40 overflow-hidden"
       >
         <div className="max-w-[1400px] mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-16 lg:gap-24">
           
@@ -353,17 +353,17 @@ const ContactSection: React.FC = () => {
               </h2>
               
               <p className="text-gray-500 font-light leading-relaxed text-lg mb-12 max-w-md">
-                We don&apos;t just map out routes; we curate the moments that turn into lifelong memories. Your quiet sunset over the Indian Ocean is waiting.
+                We don&apos;t just map out routes, we curate the moments that turn into lifelong memories. Your quiet sunset over the Indian Ocean is waiting.
               </p>
 
               {/* Minimalist Signature */}
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-300">
-                  <span className="text-[#5e17eb] font-black text-sm" style={{ fontFamily: "'Syne', sans-serif" }}>TT</span>
+                  <img src="/SLtriptipLogo.svg" alt="Logo" width={40} height={40} /> 
                 </div>
                 <div>
                   <p className="text-xs font-bold tracking-[0.2em] uppercase text-gray-900">Sri Lankan TripTip</p>
-                  <p className="text-xs text-gray-400 font-light">The Island&apos;s Finest Curators</p>
+                  <p className="text-xs text-gray-400 font-light">Turn Your Travel Dreams into Timeless Memories</p>
                 </div>
               </div>
             </div>
@@ -382,7 +382,7 @@ const ContactSection: React.FC = () => {
               {/* Image Container */}
               <div className="w-full h-full overflow-hidden relative z-10 bg-gray-200">
                 <img
-                  src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1200&q=80" 
+                  src="/TT4.jpg" 
                   alt="Serene Sri Lankan Beach at Dusk"
                   className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-105"
                 />
