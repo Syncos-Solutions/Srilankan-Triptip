@@ -415,8 +415,8 @@ const CustomPlanningPage: React.FC = () => {
               <div className="flex flex-col gap-5">
                 {[
                   { stat: '100%', text: 'Custom — built around you, not a template' },
-                  { stat: '30+',  text: 'Day itineraries crafted for demanding travellers' },
-                  { stat: '12+',  text: 'Years mapping every secret corner of Sri Lanka' },
+                  { stat: '20+',  text: 'Day itineraries crafted for demanding travellers' },
+                  { stat: '5+',  text: 'Years mapping every secret corner of Sri Lanka' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-5">
                     <div
@@ -440,7 +440,7 @@ const CustomPlanningPage: React.FC = () => {
           <div className="max-w-[1400px] mx-auto">
             <div className="relative overflow-hidden" style={{ height: 'clamp(260px, 38vw, 480px)' }}>
               <img
-                src="../blogimg/sigiriya.avif"
+                src="/TT6.jpg"
                 alt="Sri Lanka bespoke journey"
                 className="w-full h-full object-cover"
                 style={{ objectPosition: 'center 35%' }}
@@ -551,7 +551,7 @@ const CustomPlanningPage: React.FC = () => {
         {/* ── PLANNING FORM ─────────────────── */}
         <div
           ref={formRef.ref as React.RefObject<HTMLDivElement>}
-          className="bg-[#f4f4f4] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
+          className="bg-[#e8e4df] px-6 sm:px-10 lg:px-20 py-20 lg:py-28"
         >
           <div className="max-w-[1400px] mx-auto">
             {/* Header */}

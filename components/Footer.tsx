@@ -228,15 +228,15 @@ const FooterSection: React.FC = () => {
             <ul className="space-y-6 text-sm font-light text-gray-300">
               <li>
                 <span className="block text-gray-500 mb-1 font-bold tracking-widest uppercase text-[10px]">Direct Email</span>
-                <a href="mailto:journeys@triptip.lk" className="hover:text-[#5e17eb] transition-colors">journeys@triptip.lk</a>
+                <a href="mailto:info@srilankantriptip.com" className="hover:text-[#5e17eb] transition-colors">info@srilankantriptip.com</a>
               </li>
               <li>
                 <span className="block text-gray-500 mb-1 font-bold tracking-widest uppercase text-[10px]">Concierge (24/7)</span>
-                <a href="tel:+94771234567" className="hover:text-[#5e17eb] transition-colors">+94 77 123 4567</a>
+                <a href="tel:+94761595647" className="hover:text-[#5e17eb] transition-colors">+94 76 159 5647</a>
               </li>
               <li>
                 <span className="block text-gray-500 mb-1 font-bold tracking-widest uppercase text-[10px]">Location</span>
-                145 Galle Road,<br />Colombo 03, Sri Lanka
+                Madiha,<br />Matara, Sri Lanka
               </li>
             </ul>
           </div>
